@@ -8,6 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Calendar, CheckCircle, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { createAppointment, type CreateAppointmentRequest } from '@/services/api/appointments';
 
 const serviceOptions = [
   { value: 'checkup', label: 'General Check-up & Cleaning' },
@@ -36,6 +37,8 @@ interface FormErrors {
 
 export default function BookAppointment() {
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [formData, setFormData] = useState({
@@ -88,11 +91,46 @@ export default function BookAppointment() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // In production, this would send to your .NET API
-    setIsSubmitted(true);
-  };
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setSubmitError('');
+      setIsSubmitting(true);
+
+      try {
+        const requestData: CreateAppointmentRequest = {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phoneNumber: formData.phone,
+          isNewPatient: formData.isNewPatient,
+          requestedDate: `${formData.date}T00:00:00`,
+          requestedTime: formData.time,
+          treatmentType: formData.service || null,
+          notes: [
+            formData.notes,
+            formData.needsAccessibility
+              ? `Accessibility needs: ${formData.accessibilityDetails || 'Yes'}`
+              : '',
+          ]
+            .filter(Boolean)
+            .join('\n'),
+        };
+
+        const result = await createAppointment(requestData);
+        console.log('Appointment created:', result);
+
+        setIsSubmitted(true);
+      } catch (error: any) {
+        console.error('Failed to create appointment:', error);
+
+        setSubmitError(
+          error?.response?.data?.message ||
+            'Something went wrong while submitting your appointment request.'
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -352,6 +390,8 @@ export default function BookAppointment() {
                   hint="Optional: dental concerns, medical conditions, etc."
                 />
 
+
+
                 <div className="flex justify-between gap-4">
                   <Button 
                     type="button" 
@@ -448,6 +488,16 @@ export default function BookAppointment() {
                   </dl>
                 </div>
 
+                    {submitError && (
+                  <div
+                    className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"
+                    role="alert"
+                    aria-live="polite"
+                  >
+                    {submitError}
+                  </div>
+                )}
+
                 <div className="flex justify-between gap-4">
                   <Button 
                     type="button" 
@@ -463,9 +513,10 @@ export default function BookAppointment() {
                     type="submit"
                     size="lg"
                     className="min-h-touch"
+                    disabled={isSubmitting}
                   >
                     <Calendar className="mr-2 h-5 w-5" aria-hidden="true" />
-                    Submit Appointment Request
+                    {isSubmitting ? 'Submitting...' : 'Submit Appointment Request'}
                   </Button>
                 </div>
               </fieldset>
