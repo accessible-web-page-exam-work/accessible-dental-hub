@@ -37,3 +37,20 @@ export const updateAppointmentStatus = async (
   const response = await api.put(`/appointments/${id}/status`, { status });
   return response.data;
 };
+
+export const getAvailableSlots = async (requestedDate: string, requestedTime: string) => {
+  const response = await api.get('/AppointmentSlots/available', {
+    params: { requestedDate, requestedTime },
+  });
+  return response.data;
+};
+
+export const confirmAppointmentWithSlot = async (
+  appointmentId: number,
+  appointmentSlotId: number
+) => {
+  const response = await api.put(`/appointments/${appointmentId}/confirm-with-slot`, {
+    appointmentSlotId,
+  });
+  return response.data;
+};

@@ -3,14 +3,17 @@ import { Layout } from '@/components/layout/Layout';
 import {
   getAllAppointments,
   updateAppointmentStatus,
+  getAvailableSlots,
+  confirmAppointmentWithSlot,
 } from '@/services/api/appointments';
 import { Button } from '@/components/ui/button';
+import AvailableSlotsModal, {
+  AppointmentSlot,
+  ReceptionistAppointment,
+} from '@/components/receptionist/AvailableSlotsModal';
 
-interface Appointment {
-  id: number;
+interface Appointment extends ReceptionistAppointment {
   patientId: number;
-  requestedDate: string;
-  requestedTime: string;
   treatmentType?: string | null;
   notes?: string | null;
   status: 'Pending' | 'Confirmed' | 'Cancelled';
@@ -31,6 +34,12 @@ export default function ReceptionistDashboard() {
   const [isUpdatingId, setIsUpdatingId] = useState<number | null>(null);
   const [error, setError] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterStatus>('Pending');
+
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [availableSlots, setAvailableSlots] = useState<AppointmentSlot[]>([]);
+  const [isSlotsLoading, setIsSlotsLoading] = useState(false);
+  const [isConfirmingSlot, setIsConfirmingSlot] = useState<number | null>(null);
+  const [isSlotModalOpen, setIsSlotModalOpen] = useState(false);
 
   const loadAppointments = async () => {
     try {
@@ -53,10 +62,53 @@ export default function ReceptionistDashboard() {
     loadAppointments();
   }, []);
 
-  const handleStatusUpdate = async (
-    appointmentId: number,
-    status: 'Confirmed' | 'Cancelled'
-  ) => {
+  const handleOpenSlots = async (appointment: Appointment) => {
+    try {
+      setError('');
+      setSelectedAppointment(appointment);
+      setIsSlotModalOpen(true);
+      setIsSlotsLoading(true);
+
+      const response = await getAvailableSlots(
+        appointment.requestedDate,
+        appointment.requestedTime
+      );
+
+      const data = Array.isArray(response) ? response : response.data ?? [];
+      setAvailableSlots(data);
+    } catch (err) {
+      console.error('Failed to load available slots:', err);
+      setError('Could not load available slots.');
+      setAvailableSlots([]);
+    } finally {
+      setIsSlotsLoading(false);
+    }
+  };
+
+  const handleCloseSlotsModal = () => {
+    setIsSlotModalOpen(false);
+    setSelectedAppointment(null);
+    setAvailableSlots([]);
+  };
+
+  const handleConfirmWithSlot = async (appointmentId: number, slotId: number) => {
+    try {
+      setError('');
+      setIsConfirmingSlot(slotId);
+
+      await confirmAppointmentWithSlot(appointmentId, slotId);
+
+      handleCloseSlotsModal();
+      await loadAppointments();
+    } catch (err) {
+      console.error('Failed to confirm appointment with slot:', err);
+      setError('Could not confirm appointment with the selected slot.');
+    } finally {
+      setIsConfirmingSlot(null);
+    }
+  };
+
+  const handleStatusUpdate = async (appointmentId: number, status: 'Cancelled') => {
     try {
       setIsUpdatingId(appointmentId);
       await updateAppointmentStatus(appointmentId, status);
@@ -260,24 +312,27 @@ export default function ReceptionistDashboard() {
                         </div>
 
                         <div className="flex flex-wrap gap-3">
-                          <Button
-                            type="button"
-                            onClick={() => handleStatusUpdate(appointment.id, 'Confirmed')}
-                            disabled={isUpdatingId === appointment.id}
-                            className="min-w-[120px]"
-                          >
-                            {isUpdatingId === appointment.id ? 'Updating...' : 'Confirm'}
-                          </Button>
+                          {appointment.status === 'Pending' && (
+                            <>
+                              <Button
+                                type="button"
+                                onClick={() => handleOpenSlots(appointment)}
+                                className="min-w-[140px]"
+                              >
+                                View Slots
+                              </Button>
 
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => handleStatusUpdate(appointment.id, 'Cancelled')}
-                            disabled={isUpdatingId === appointment.id}
-                            className="min-w-[120px]"
-                          >
-                            Cancel
-                          </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => handleStatusUpdate(appointment.id, 'Cancelled')}
+                                disabled={isUpdatingId === appointment.id}
+                                className="min-w-[120px]"
+                              >
+                                Cancel
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </div>
 
@@ -376,6 +431,18 @@ export default function ReceptionistDashboard() {
           )}
         </div>
       </div>
+
+      <AvailableSlotsModal
+        isOpen={isSlotModalOpen}
+        appointment={selectedAppointment}
+        availableSlots={availableSlots}
+        isLoading={isSlotsLoading}
+        isConfirmingSlot={isConfirmingSlot}
+        onClose={handleCloseSlotsModal}
+        onConfirmSlot={handleConfirmWithSlot}
+        formatDate={formatDate}
+        formatTimeLabel={formatTimeLabel}
+      />
     </Layout>
   );
 }
