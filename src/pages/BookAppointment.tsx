@@ -375,7 +375,7 @@ export default function BookAppointment() {
                   error={errors.date}
                   hint="We're available Monday through Saturday"
                   required
-                  min={new Date().toISOString().split('T')[0]}
+                  min={new Date().toLocaleDateString('sv-SE')}
                 />
 
                 <AccessibleSelect
