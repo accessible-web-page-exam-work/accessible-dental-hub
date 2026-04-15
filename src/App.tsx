@@ -10,6 +10,7 @@ import ServicesPage from "./pages/Services";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import ReceptionistDashboard from "./pages/ReceptionistDashboard";
+import Portal from "./pages/Portal";
 
 const queryClient = new QueryClient();
 
@@ -21,7 +22,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Portal />} />
+            <Route path="/home" element={<Index />} />
             <Route path="/book" element={<BookAppointment />} />
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/contact" element={<Contact />} />
