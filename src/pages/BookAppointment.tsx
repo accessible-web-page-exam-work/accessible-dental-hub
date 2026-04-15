@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
-import { 
-  AccessibleInput, 
-  AccessibleSelect, 
-  AccessibleTextarea 
+import {
+  AccessibleInput,
+  AccessibleSelect,
+  AccessibleTextarea,
 } from '@/components/ui/accessible-form';
 import { Button } from '@/components/ui/button';
 import { Calendar, CheckCircle, ArrowLeft, ArrowRight } from 'lucide-react';
@@ -25,6 +25,19 @@ const timeOptions = [
   { value: 'evening', label: 'Evening (4:00 PM - 6:00 PM)' },
 ];
 
+const contactMethodOptions = [
+  { value: 'Email', label: 'Email' },
+  { value: 'Phone', label: 'Phone Call' },
+  { value: 'SMS', label: 'Text Message (SMS)' },
+];
+
+const contactTimeOptions = [
+  { value: 'Morning', label: 'Morning' },
+  { value: 'Afternoon', label: 'Afternoon' },
+  { value: 'Evening', label: 'Evening' },
+  { value: 'Anytime', label: 'Anytime' },
+];
+
 interface FormErrors {
   firstName?: string;
   lastName?: string;
@@ -41,6 +54,7 @@ export default function BookAppointment() {
   const [submitError, setSubmitError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -53,127 +67,152 @@ export default function BookAppointment() {
     isNewPatient: false,
     needsAccessibility: false,
     accessibilityDetails: '',
+    preferredContactMethod: '',
+    preferredContactTime: '',
+    communicationNeeds: '',
   });
 
   const validateStep1 = () => {
     const newErrors: FormErrors = {};
+
     if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
     if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
+
     if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const validateStep2 = () => {
     const newErrors: FormErrors = {};
+
     if (!formData.service) newErrors.service = 'Please select a service';
     if (!formData.date) newErrors.date = 'Please select a date';
     if (!formData.time) newErrors.time = 'Please select a preferred time';
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const announceStepChange = (message: string) => {
+    const announcement = document.getElementById('step-announcement');
+    if (announcement) {
+      announcement.textContent = message;
+    }
   };
 
   const handleNext = () => {
     if (step === 1 && validateStep1()) {
       setStep(2);
-      // Announce step change to screen readers
-      const announcement = document.getElementById('step-announcement');
-      if (announcement) announcement.textContent = 'Step 2 of 3: Appointment Details';
+      announceStepChange('Step 2 of 3: Appointment Details');
     } else if (step === 2 && validateStep2()) {
       setStep(3);
-      const announcement = document.getElementById('step-announcement');
-      if (announcement) announcement.textContent = 'Step 3 of 3: Review and Submit';
+      announceStepChange('Step 3 of 3: Review and Submit');
     }
   };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      setSubmitError('');
-      setIsSubmitting(true);
+  const handleBack = (previousStep: number, announcement: string) => {
+    setStep(previousStep);
+    announceStepChange(announcement);
+  };
 
-      try {
-        const requestData: CreateAppointmentRequest = {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phoneNumber: formData.phone,
-          isNewPatient: formData.isNewPatient,
-          requestedDate: `${formData.date}T00:00:00`,
-          requestedTime: formData.time,
-          treatmentType: formData.service || null,
-          notes: [
-            formData.notes,
-            formData.needsAccessibility
-              ? `Accessibility needs: ${formData.accessibilityDetails || 'Yes'}`
-              : '',
-          ]
-            .filter(Boolean)
-            .join('\n'),
-        };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitError('');
+    setIsSubmitting(true);
 
-        const result = await createAppointment(requestData);
-        console.log('Appointment created:', result);
+    try {
+      const combinedCommunicationNeeds =
+        [
+          formData.communicationNeeds.trim(),
+          formData.needsAccessibility
+            ? `Accessibility needs: ${formData.accessibilityDetails.trim() || 'Yes'}`
+            : '',
+        ]
+          .filter(Boolean)
+          .join('\n') || null;
 
-        setIsSubmitted(true);
-      } catch (error: any) {
-        console.error('Failed to create appointment:', error);
+      const requestData: CreateAppointmentRequest = {
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        email: formData.email.trim(),
+        phoneNumber: formData.phone.trim(),
+        isNewPatient: formData.isNewPatient,
+        requestedDate: `${formData.date}T00:00:00`,
+        requestedTime: formData.time,
+        treatmentType: formData.service || null,
+        notes: formData.notes.trim() || null,
+        preferredContactMethod: formData.preferredContactMethod || null,
+        preferredContactTime: formData.preferredContactTime || null,
+        communicationNeeds: combinedCommunicationNeeds,
+      };
 
-        setSubmitError(
-          error?.response?.data?.message ||
-            'Something went wrong while submitting your appointment request.'
-        );
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
+      const result = await createAppointment(requestData);
+      console.log('Appointment created:', result);
+
+      setIsSubmitted(true);
+    } catch (error: any) {
+      console.error('Failed to create appointment:', error);
+
+      setSubmitError(
+        error?.response?.data?.message ||
+          'Something went wrong while submitting your appointment request.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
     if (errors[field as keyof FormErrors]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
+
+  const combinedReviewCommunicationNeeds = [
+    formData.communicationNeeds,
+    formData.needsAccessibility
+      ? formData.accessibilityDetails || 'Accessibility support requested'
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' | ');
 
   if (isSubmitted) {
     return (
       <Layout>
         <div className="container px-4 sm:px-6 lg:px-8 py-16">
-          <div 
-            className="max-w-2xl mx-auto text-center"
-            role="alert"
-            aria-live="polite"
-          >
+          <div className="max-w-2xl mx-auto text-center" role="alert" aria-live="polite">
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-success/10 flex items-center justify-center">
               <CheckCircle className="h-10 w-10 text-success" aria-hidden="true" />
             </div>
+
             <h1 className="text-fluid-3xl font-bold text-foreground mb-4">
               Appointment Request Received!
             </h1>
+
             <p className="text-fluid-lg text-muted-foreground mb-8">
-              Thank you, {formData.firstName}! We've received your appointment request 
-              for {formData.date}. We'll contact you within 24 hours to confirm your appointment.
+              Thank you, {formData.firstName}! We&apos;ve received your appointment request for{' '}
+              {formData.date}. We&apos;ll review your request and contact you within 24 hours using
+              your preferred contact method.
             </p>
+
             <div className="flex flex-wrap justify-center gap-4">
               <Button asChild size="lg" className="min-h-touch">
-                <Link to="/">
-                  Return to Home
-                </Link>
+                <Link to="/">Return to Home</Link>
               </Button>
-              <Button 
-                asChild 
-                variant="outline" 
-                size="lg" 
-                className="min-h-touch"
-              >
-                <a href="tel:+1234567890">
-                  Call Us Now
-                </a>
+
+              <Button asChild variant="outline" size="lg" className="min-h-touch">
+                <a href="tel:+1234567890">Call Us Now</a>
               </Button>
             </div>
           </div>
@@ -186,19 +225,15 @@ export default function BookAppointment() {
     <Layout>
       <div className="container px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-2xl mx-auto">
-          {/* Page Header */}
           <div className="text-center mb-8">
-            <h1 className="text-fluid-3xl font-bold text-foreground mb-4">
-              Book an Appointment
-            </h1>
+            <h1 className="text-fluid-3xl font-bold text-foreground mb-4">Book an Appointment</h1>
             <p className="text-fluid-base text-muted-foreground">
-              Complete the form below to request an appointment. We'll contact you 
-              to confirm the date and time.
+              Complete the form below to request an appointment. We&apos;ll contact you to confirm
+              the date and time.
             </p>
           </div>
 
-          {/* Progress Indicator */}
-          <div 
+          <div
             className="mb-8"
             role="progressbar"
             aria-valuenow={step}
@@ -208,15 +243,16 @@ export default function BookAppointment() {
           >
             <div className="flex justify-between items-center mb-2">
               {[1, 2, 3].map((num) => (
-                <div 
+                <div
                   key={num}
                   className={`
                     flex items-center justify-center w-10 h-10 rounded-full font-bold
-                    ${num === step 
-                      ? 'bg-primary text-primary-foreground' 
-                      : num < step 
-                        ? 'bg-success text-success-foreground' 
-                        : 'bg-secondary text-muted-foreground'
+                    ${
+                      num === step
+                        ? 'bg-primary text-primary-foreground'
+                        : num < step
+                          ? 'bg-success text-success-foreground'
+                          : 'bg-secondary text-muted-foreground'
                     }
                   `}
                   aria-current={num === step ? 'step' : undefined}
@@ -229,12 +265,14 @@ export default function BookAppointment() {
                 </div>
               ))}
             </div>
+
             <div className="h-2 bg-secondary rounded-full overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-primary transition-all duration-300"
                 style={{ width: `${((step - 1) / 2) * 100}%` }}
               />
             </div>
+
             <div className="flex justify-between text-sm mt-2 text-muted-foreground">
               <span>Personal Info</span>
               <span>Appointment</span>
@@ -242,12 +280,9 @@ export default function BookAppointment() {
             </div>
           </div>
 
-          {/* Screen reader announcement */}
           <div id="step-announcement" className="sr-only" aria-live="polite" />
 
-          {/* Form */}
           <form onSubmit={handleSubmit} noValidate>
-            {/* Step 1: Personal Information */}
             {step === 1 && (
               <fieldset className="space-y-6">
                 <legend className="text-xl font-bold text-foreground mb-4">
@@ -263,6 +298,7 @@ export default function BookAppointment() {
                     required
                     autoComplete="given-name"
                   />
+
                   <AccessibleInput
                     label="Last Name"
                     value={formData.lastName}
@@ -308,12 +344,7 @@ export default function BookAppointment() {
                 </div>
 
                 <div className="flex justify-end">
-                  <Button 
-                    type="button" 
-                    onClick={handleNext}
-                    size="lg"
-                    className="min-h-touch"
-                  >
+                  <Button type="button" onClick={handleNext} size="lg" className="min-h-touch">
                     Next: Appointment Details
                     <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                   </Button>
@@ -321,7 +352,6 @@ export default function BookAppointment() {
               </fieldset>
             )}
 
-            {/* Step 2: Appointment Details */}
             {step === 2 && (
               <fieldset className="space-y-6">
                 <legend className="text-xl font-bold text-foreground mb-4">
@@ -357,6 +387,30 @@ export default function BookAppointment() {
                   required
                 />
 
+                <AccessibleSelect
+                  label="Preferred Contact Method"
+                  value={formData.preferredContactMethod}
+                  onChange={(e) => handleInputChange('preferredContactMethod', e.target.value)}
+                  options={contactMethodOptions}
+                  hint="How would you like us to contact you about this appointment?"
+                />
+
+                <AccessibleSelect
+                  label="Preferred Contact Time"
+                  value={formData.preferredContactTime}
+                  onChange={(e) => handleInputChange('preferredContactTime', e.target.value)}
+                  options={contactTimeOptions}
+                  hint="What time is best for us to reach you?"
+                />
+
+                <AccessibleTextarea
+                  label="Communication Needs"
+                  value={formData.communicationNeeds}
+                  onChange={(e) => handleInputChange('communicationNeeds', e.target.value)}
+                  placeholder="For example: email only, no phone calls, hearing impaired, need interpreter..."
+                  hint="Optional: tell us how we can communicate with you best"
+                />
+
                 <div className="space-y-4">
                   <label className="flex items-start gap-3 cursor-pointer">
                     <input
@@ -366,8 +420,8 @@ export default function BookAppointment() {
                       className="w-6 h-6 mt-0.5 rounded border-2 border-input text-primary focus:ring-2 focus:ring-focus-ring"
                     />
                     <span className="text-foreground">
-                      I need accessibility accommodations (wheelchair access, 
-                      sign language interpreter, extended appointment time, etc.)
+                      I need accessibility accommodations (wheelchair access, sign language
+                      interpreter, extended appointment time, etc.)
                     </span>
                   </label>
 
@@ -390,25 +444,19 @@ export default function BookAppointment() {
                   hint="Optional: dental concerns, medical conditions, etc."
                 />
 
-
-
                 <div className="flex justify-between gap-4">
-                  <Button 
-                    type="button" 
+                  <Button
+                    type="button"
                     variant="outline"
-                    onClick={() => setStep(1)}
+                    onClick={() => handleBack(1, 'Step 1 of 3: Personal Information')}
                     size="lg"
                     className="min-h-touch"
                   >
                     <ArrowLeft className="mr-2 h-5 w-5" aria-hidden="true" />
                     Back
                   </Button>
-                  <Button 
-                    type="button" 
-                    onClick={handleNext}
-                    size="lg"
-                    className="min-h-touch"
-                  >
+
+                  <Button type="button" onClick={handleNext} size="lg" className="min-h-touch">
                     Next: Review
                     <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                   </Button>
@@ -416,7 +464,6 @@ export default function BookAppointment() {
               </fieldset>
             )}
 
-            {/* Step 3: Review and Submit */}
             {step === 3 && (
               <fieldset className="space-y-6">
                 <legend className="text-xl font-bold text-foreground mb-4">
@@ -425,19 +472,25 @@ export default function BookAppointment() {
 
                 <div className="bg-secondary/50 rounded-xl p-6 space-y-4">
                   <h3 className="font-bold text-lg text-foreground">Personal Information</h3>
+
                   <dl className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <dt className="text-sm text-muted-foreground">Name</dt>
-                      <dd className="font-medium">{formData.firstName} {formData.lastName}</dd>
+                      <dd className="font-medium">
+                        {formData.firstName} {formData.lastName}
+                      </dd>
                     </div>
+
                     <div>
                       <dt className="text-sm text-muted-foreground">Email</dt>
                       <dd className="font-medium">{formData.email}</dd>
                     </div>
+
                     <div>
                       <dt className="text-sm text-muted-foreground">Phone</dt>
                       <dd className="font-medium">{formData.phone}</dd>
                     </div>
+
                     <div>
                       <dt className="text-sm text-muted-foreground">Patient Status</dt>
                       <dd className="font-medium">
@@ -449,13 +502,15 @@ export default function BookAppointment() {
 
                 <div className="bg-secondary/50 rounded-xl p-6 space-y-4">
                   <h3 className="font-bold text-lg text-foreground">Appointment Details</h3>
+
                   <dl className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <dt className="text-sm text-muted-foreground">Service</dt>
                       <dd className="font-medium">
-                        {serviceOptions.find(s => s.value === formData.service)?.label}
+                        {serviceOptions.find((s) => s.value === formData.service)?.label}
                       </dd>
                     </div>
+
                     <div>
                       <dt className="text-sm text-muted-foreground">Preferred Date</dt>
                       <dd className="font-medium">
@@ -463,22 +518,41 @@ export default function BookAppointment() {
                           weekday: 'long',
                           year: 'numeric',
                           month: 'long',
-                          day: 'numeric'
+                          day: 'numeric',
                         })}
                       </dd>
                     </div>
+
                     <div>
                       <dt className="text-sm text-muted-foreground">Preferred Time</dt>
                       <dd className="font-medium">
-                        {timeOptions.find(t => t.value === formData.time)?.label}
+                        {timeOptions.find((t) => t.value === formData.time)?.label}
                       </dd>
                     </div>
-                    {formData.needsAccessibility && (
-                      <div className="sm:col-span-2">
-                        <dt className="text-sm text-muted-foreground">Accessibility Needs</dt>
-                        <dd className="font-medium">{formData.accessibilityDetails || 'Yes - details to be confirmed'}</dd>
+
+                    {formData.preferredContactMethod && (
+                      <div>
+                        <dt className="text-sm text-muted-foreground">Preferred Contact Method</dt>
+                        <dd className="font-medium">{formData.preferredContactMethod}</dd>
                       </div>
                     )}
+
+                    {formData.preferredContactTime && (
+                      <div>
+                        <dt className="text-sm text-muted-foreground">Preferred Contact Time</dt>
+                        <dd className="font-medium">{formData.preferredContactTime}</dd>
+                      </div>
+                    )}
+
+                    {combinedReviewCommunicationNeeds && (
+                      <div className="sm:col-span-2">
+                        <dt className="text-sm text-muted-foreground">
+                          Communication / Accessibility Needs
+                        </dt>
+                        <dd className="font-medium">{combinedReviewCommunicationNeeds}</dd>
+                      </div>
+                    )}
+
                     {formData.notes && (
                       <div className="sm:col-span-2">
                         <dt className="text-sm text-muted-foreground">Additional Notes</dt>
@@ -488,7 +562,7 @@ export default function BookAppointment() {
                   </dl>
                 </div>
 
-                    {submitError && (
+                {submitError && (
                   <div
                     className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"
                     role="alert"
@@ -499,22 +573,18 @@ export default function BookAppointment() {
                 )}
 
                 <div className="flex justify-between gap-4">
-                  <Button 
-                    type="button" 
+                  <Button
+                    type="button"
                     variant="outline"
-                    onClick={() => setStep(2)}
+                    onClick={() => handleBack(2, 'Step 2 of 3: Appointment Details')}
                     size="lg"
                     className="min-h-touch"
                   >
                     <ArrowLeft className="mr-2 h-5 w-5" aria-hidden="true" />
                     Back
                   </Button>
-                  <Button 
-                    type="submit"
-                    size="lg"
-                    className="min-h-touch"
-                    disabled={isSubmitting}
-                  >
+
+                  <Button type="submit" size="lg" className="min-h-touch" disabled={isSubmitting}>
                     <Calendar className="mr-2 h-5 w-5" aria-hidden="true" />
                     {isSubmitting ? 'Submitting...' : 'Submit Appointment Request'}
                   </Button>

@@ -10,6 +10,9 @@ export interface CreateAppointmentRequest {
   requestedTime: string;
   treatmentType?: string | null;
   notes?: string | null;
+  preferredContactMethod?: string | null;
+  preferredContactTime?: string | null;
+  communicationNeeds?: string | null;
 }
 
 export const createAppointment = async (data: CreateAppointmentRequest) => {
