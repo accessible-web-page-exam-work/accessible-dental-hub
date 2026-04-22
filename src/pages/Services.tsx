@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 
 const services = [
   {
-    id: 'general',
+    id: 'general-dentistry',
     icon: Smile,
     title: 'General Dentistry',
     description: 'Comprehensive check-ups, cleanings, and preventive care to maintain your oral health.',
@@ -32,7 +32,7 @@ const services = [
     recommended: 'Every 6 months'
   },
   {
-    id: 'cosmetic',
+    id: 'cosmetic-dentistry',
     icon: Sparkles,
     title: 'Cosmetic Dentistry',
     description: 'Teeth whitening, veneers, and smile makeovers to enhance your confidence.',
@@ -48,7 +48,7 @@ const services = [
     recommended: 'As needed'
   },
   {
-    id: 'restorative',
+    id: 'restorative-care',
     icon: Shield,
     title: 'Restorative Care',
     description: 'Fillings, crowns, bridges, and implants to restore damaged or missing teeth.',
@@ -64,7 +64,7 @@ const services = [
     recommended: 'As needed'
   },
   {
-    id: 'emergency',
+    id: 'emergency-care',
     icon: Heart,
     title: 'Emergency Care',
     description: 'Same-day appointments available for dental emergencies and urgent pain relief.',
@@ -80,7 +80,7 @@ const services = [
     recommended: 'When needed'
   },
   {
-    id: 'periodontal',
+    id: 'periodontal-treatment',
     icon: Stethoscope,
     title: 'Periodontal Treatment',
     description: 'Gum disease prevention and treatment to protect your dental foundation.',
@@ -96,7 +96,7 @@ const services = [
     recommended: 'Based on condition'
   },
   {
-    id: 'pediatric',
+    id: 'pediatric-dentistry',
     icon: Baby,
     title: 'Pediatric Dentistry',
     description: 'Gentle, child-friendly care in a comfortable environment for young patients.',
@@ -136,7 +136,7 @@ export default function ServicesPage() {
               <article
                 key={service.id}
                 id={service.id}
-                className="bg-card rounded-xl border border-border overflow-hidden shadow-sm"
+                className="bg-card rounded-xl border border-border overflow-hidden shadow-sm scroll-mt-24"
                 role="listitem"
               >
                 <div className="p-6 md:p-8">
