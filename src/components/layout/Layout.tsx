@@ -2,6 +2,7 @@ import React from 'react';
 import { SkipLink } from '@/components/accessibility/SkipLink';
 import { Header } from './Header';
 import { Footer } from './Footer';
+import { ScrollToHash } from '@/components/ScrollToHash';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ export function Layout({ children, minimalHeader = false }: LayoutProps) {
     <div className="flex min-h-screen flex-col">
       <SkipLink targetId="main-content" />
       <Header minimal={minimalHeader} />
+      <ScrollToHash />
       <main 
         id="main-content" 
         className="flex-1"
