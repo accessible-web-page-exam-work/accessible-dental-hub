@@ -47,19 +47,18 @@ export function Hero() {
               <Button
                 asChild
                 size="lg"
-                className="min-h-touch text-base font-semibold"
+                className="min-h-touch text-base font-semibold hover:bg-accent hover:text-accent-foreground no-underline"
               >
-                <Link to="/portal">
+                <Link to="/book">
                   <Calendar className="mr-2 h-5 w-5" aria-hidden="true" />
-                  Continue to Booking Portal
+                  Book an Appointment
                 </Link>
               </Button>
 
               <Button
                 asChild
-                variant="outline"
                 size="lg"
-                className="min-h-touch text-base font-semibold"
+                className="min-h-touch text-base font-semibold hover:bg-accent hover:text-accent-foreground no-underline"
               >
                 <a href="tel:+1234567890">
                   <Phone className="mr-2 h-5 w-5" aria-hidden="true" />

@@ -106,7 +106,7 @@ export function Services() {
 
         {/* CTA */}
         <div className="text-center mt-12">
-          <Button asChild size="lg" className="min-h-touch text-base font-semibold">
+          <Button asChild size="lg" className="min-h-touch text-base font-semibold no-underline hover:bg-accent hover:text-accent-foreground">
             <Link to="/book">
               Book Your Appointment Today
               <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />

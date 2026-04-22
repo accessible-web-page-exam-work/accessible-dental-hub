@@ -51,7 +51,7 @@ const Portal = () => {
                 </div>
 
                 <div className="pt-6">
-                    <Button asChild size="lg" className="w-full min-h-touch">
+                    <Button asChild size="lg" className="w-full min-h-touch hover:bg-accent hover:text-accent-foreground no-underline">
                     <Link to="/home">
                         Enter Website
                         <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
@@ -84,7 +84,7 @@ const Portal = () => {
                 </div>
 
                 <div className="pt-6">
-                  <Button asChild size="lg" variant="outline" className="w-full min-h-touch">
+                  <Button asChild size="lg" className="w-full min-h-touch hover:bg-accent hover:text-accent-foreground no-underline">
                     <Link to="/receptionist">
                       Open Dashboard
                       <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
