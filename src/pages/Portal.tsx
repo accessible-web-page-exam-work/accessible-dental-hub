@@ -6,7 +6,7 @@ import { Calendar, Users, UserRound, ArrowRight } from 'lucide-react';
 
 const Portal = () => {
   return (
-    <Layout>
+    <Layout minimalHeader>
       <section className="py-16 md:py-24" aria-labelledby="portal-heading">
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl space-y-10">
