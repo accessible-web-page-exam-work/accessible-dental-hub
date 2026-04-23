@@ -11,6 +11,9 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import ReceptionistDashboard from "./pages/ReceptionistDashboard";
 import Portal from "./pages/Portal";
+import PatientDashboard from "./pages/PatientDashboard";
+import PatientBook from "./pages/PatientBook";
+import PatientAppointments from "./pages/PatientAppointments";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +31,9 @@ const App = () => (
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/receptionist" element={<ReceptionistDashboard />} />
+            <Route path="/patient/dashboard" element={<PatientDashboard />} />
+            <Route path="/patient/book" element={<PatientBook />} />
+            <Route path="/patient/appointments" element={<PatientAppointments />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
