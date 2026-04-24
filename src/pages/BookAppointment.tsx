@@ -161,8 +161,10 @@ export default function BookAppointment() {
       };
 
       const result = await createAppointment(requestData);
-      console.log("Appointment created:", result);
-
+      if (!result.success) {
+        setSubmitError(result.message || "Booking failed");
+        return;
+      }
       setSuccessMessage(
         "Appointment request received! We will contact you soon.",
       );
