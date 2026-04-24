@@ -3,8 +3,11 @@ import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { CalendarDays, Clock3, FileText, MessageSquare, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { createPatientAppointment } from '@/services/api/appointments';
+import { useParams } from 'react-router-dom';
 
 const PatientBook = () => {
+  const { patientId } = useParams<{ patientId: string }>();
   const [formData, setFormData] = useState({
     requestedDate: '',
     requestedTime: '',
@@ -24,15 +27,35 @@ const PatientBook = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    console.log('Patient booking request:', formData);
+  if (!patientId) {
+    console.error('Patient ID is missing');
+    return;
+  }
 
-    // later:
-    // call API to create appointment request with formData
-    // await createPatientAppointment(formData)
-  };
+  try {
+    const result = await createPatientAppointment(Number(patientId), {
+      requestedDate: formData.requestedDate,
+      requestedTime: formData.requestedTime,
+      treatmentType: formData.treatmentType,
+      notes: formData.notes,
+      preferredContactMethod: formData.preferredContactMethod,
+      preferredContactTime: formData.preferredContactTime,
+      communicationNeeds: '',
+    });
+
+    if (!result.success) {
+      console.error('Booking failed:', result);
+      return;
+    }
+
+    console.log('Booking created:', result);
+  } catch (error) {
+    console.error('Booking request failed:', error);
+  }
+};
 
   return (
     <Layout minimalHeader>
