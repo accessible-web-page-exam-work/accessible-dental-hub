@@ -1,70 +1,98 @@
-import React, { useState } from 'react';
-import { Layout } from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
-import { CalendarDays, Clock3, FileText, MessageSquare, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { createPatientAppointment } from '@/services/api/appointments';
-import { useParams } from 'react-router-dom';
+import React, { useState } from "react";
+import { Layout } from "@/components/layout/Layout";
+import { Button } from "@/components/ui/button";
+import {
+  CalendarDays,
+  Clock3,
+  FileText,
+  MessageSquare,
+  ArrowLeft,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { createPatientAppointment } from "@/services/api/appointments";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const PatientBook = () => {
   const { patientId } = useParams<{ patientId: string }>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    requestedDate: '',
-    requestedTime: '',
-    treatmentType: '',
-    notes: '',
-    preferredContactMethod: '',
-    preferredContactTime: '',
+    requestedDate: "",
+    requestedTime: "",
+    treatmentType: "",
+    notes: "",
+    preferredContactMethod: "",
+    preferredContactTime: "",
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  if (!patientId) {
-    console.error('Patient ID is missing');
-    return;
-  }
-
-  try {
-    const result = await createPatientAppointment(Number(patientId), {
-      requestedDate: formData.requestedDate,
-      requestedTime: formData.requestedTime,
-      treatmentType: formData.treatmentType,
-      notes: formData.notes,
-      preferredContactMethod: formData.preferredContactMethod,
-      preferredContactTime: formData.preferredContactTime,
-      communicationNeeds: '',
-    });
-
-    if (!result.success) {
-      console.error('Booking failed:', result);
+    if (!patientId) {
+      setErrorMessage("Patient ID is missing");
       return;
     }
 
-    console.log('Booking created:', result);
-  } catch (error) {
-    console.error('Booking request failed:', error);
-  }
-};
+    setIsSubmitting(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      const result = await createPatientAppointment(Number(patientId), {
+        requestedDate: formData.requestedDate,
+        requestedTime: formData.requestedTime,
+        treatmentType: formData.treatmentType,
+        notes: formData.notes,
+        preferredContactMethod: formData.preferredContactMethod,
+        preferredContactTime: formData.preferredContactTime,
+        communicationNeeds: "",
+      });
+
+      if (!result.success) {
+        console.error("Booking failed:", result);
+        setErrorMessage("Booking failed. Please try again.");
+        return;
+      }
+
+      console.log("Booking created:", result);
+      setSuccessMessage("Booking created successfully!");
+      setTimeout(() => {
+        navigate(`/patient/${patientId}/dashboard`);
+      }, 5000);
+    } catch (error) {
+      console.error("Booking request failed:", error);
+      setErrorMessage("Booking request failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Layout minimalHeader>
-      <section className="py-16 md:py-24" aria-labelledby="patient-book-heading">
+      <section
+        className="py-16 md:py-24"
+        aria-labelledby="patient-book-heading"
+      >
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl space-y-8">
             <div className="space-y-4">
               <Link
-                to="/patient/dashboard"
+                to={`/patient/${patientId}/dashboard`}
                 className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-accent/90 focus-visible:outline-offset-4 no-underline"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -82,13 +110,31 @@ const handleSubmit = async (e: React.FormEvent) => {
                   Request a New Appointment
                 </h1>
                 <p className="max-w-2xl text-fluid-base text-muted-foreground">
-                  Choose your preferred date, time, and treatment type. Your contact details
-                  are already connected to your patient profile.
+                  Choose your preferred date, time, and treatment type. Your
+                  contact details are already connected to your patient profile.
                 </p>
               </div>
             </div>
 
             <div className="rounded-2xl border bg-card p-6 shadow-sm md:p-8">
+              {successMessage && (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+                >
+                  {successMessage}
+                </div>
+              )}
+
+              {errorMessage && (
+                <div
+                  role="alert"
+                  className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                >
+                  {errorMessage}
+                </div>
+              )}
               <form onSubmit={handleSubmit} className="space-y-8">
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
@@ -210,7 +256,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="notes" className="text-sm font-medium text-foreground">
+                  <label
+                    htmlFor="notes"
+                    className="text-sm font-medium text-foreground"
+                  >
                     Notes
                   </label>
                   <div className="relative">
@@ -228,12 +277,22 @@ const handleSubmit = async (e: React.FormEvent) => {
                 </div>
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-                  <Button asChild type="button" size="lg" className="min-h-touch hover:bg-accent hover:text-accent-foreground no-underline">
-                    <Link to="/patient/dashboard">Cancel</Link>
+                  <Button
+                    asChild
+                    type="button"
+                    size="lg"
+                    className="min-h-touch hover:bg-accent hover:text-accent-foreground no-underline"
+                  >
+                    <Link to={`/patient/${patientId}/dashboard`}>Cancel</Link>
                   </Button>
 
-                  <Button type="submit" size="lg" className="min-h-touch hover:bg-accent hover:text-accent-foreground no-underline">
-                    Submit Request
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={isSubmitting}
+                    className="min-h-touch hover:bg-accent hover:text-accent-foreground no-underline"
+                  >
+                    {isSubmitting ? 'Submitting...' : 'Submit Request'}
                   </Button>
                 </div>
               </form>
