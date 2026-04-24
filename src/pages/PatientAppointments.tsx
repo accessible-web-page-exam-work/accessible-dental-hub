@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -10,69 +10,16 @@ import {
   Stethoscope,
   MapPin,
 } from 'lucide-react';
+import { getPatientAppointments, type PatientAppointment } from '@/services/api/appointments';
+import { useParams } from 'react-router-dom';
 
 type AppointmentStatus = 'Pending' | 'Confirmed' | 'Cancelled' | 'Completed';
 
-interface PatientAppointment {
-  id: number;
-  requestedDate: string;
-  requestedTime: string;
-  treatmentType: string;
-  status: AppointmentStatus;
-  dentistName?: string;
-  room?: string;
-  scheduledStartTime?: string;
-  scheduledEndTime?: string;
-}
-
-const mockAppointments: PatientAppointment[] = [
-  {
-    id: 101,
-    requestedDate: '2026-04-28',
-    requestedTime: 'Evening',
-    treatmentType: 'Restorative',
-    status: 'Pending',
-  },
-  {
-    id: 102,
-    requestedDate: '2026-05-04',
-    requestedTime: 'Morning',
-    treatmentType: 'Cleaning',
-    status: 'Confirmed',
-    dentistName: 'Dr. Sarah Lind',
-    room: 'Room 2',
-    scheduledStartTime: '2026-05-04T09:00:00',
-    scheduledEndTime: '2026-05-04T09:30:00',
-  },
-  {
-    id: 103,
-    requestedDate: '2026-03-14',
-    requestedTime: 'Afternoon',
-    treatmentType: 'Check-up',
-    status: 'Completed',
-    dentistName: 'Dr. Adam Noor',
-    room: 'Room 1',
-    scheduledStartTime: '2026-03-14T13:00:00',
-    scheduledEndTime: '2026-03-14T13:20:00',
-  },
-  {
-    id: 104,
-    requestedDate: '2026-02-10',
-    requestedTime: 'Morning',
-    treatmentType: 'Consultation',
-    status: 'Cancelled',
-  },
-];
-
 const statusClasses: Record<AppointmentStatus, string> = {
-  Pending:
-    'bg-amber-100 text-amber-800 border border-amber-200',
-  Confirmed:
-    'bg-emerald-100 text-emerald-800 border border-emerald-200',
-  Cancelled:
-    'bg-rose-100 text-rose-800 border border-rose-200',
-  Completed:
-    'bg-slate-100 text-slate-800 border border-slate-200',
+  Pending: 'bg-amber-100 text-amber-800 border border-amber-200',
+  Confirmed: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
+  Cancelled: 'bg-rose-100 text-rose-800 border border-rose-200',
+  Completed: 'bg-slate-100 text-slate-800 border border-slate-200',
 };
 
 const formatDate = (dateString: string) => {
@@ -93,14 +40,63 @@ const formatDateTime = (dateTimeString?: string) => {
 };
 
 const PatientAppointments = () => {
-  const [activeFilter, setActiveFilter] = useState<
-    'All' | AppointmentStatus
-  >('All');
+  const [appointments, setAppointments] = useState<PatientAppointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<'All' | AppointmentStatus>('All');
+  const { patientId } = useParams();
+
+
+
+    useEffect(() => {
+    const fetchAppointments = async () => {
+        try {
+        if (!patientId) {
+            setError('Missing patient id');
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+
+        const result = await getPatientAppointments(Number(patientId));
+
+        if (!result.success) {
+          setError(result.message || 'Failed to load appointments');
+          return;
+        }
+
+        setAppointments(result.data ?? []);
+      } catch {
+        setError('Something went wrong');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAppointments();
+  }, [patientId]);
 
   const filteredAppointments = useMemo(() => {
-    if (activeFilter === 'All') return mockAppointments;
-    return mockAppointments.filter(a => a.status === activeFilter);
-  }, [activeFilter]);
+    if (activeFilter === 'All') return appointments;
+    return appointments.filter(a => a.status === activeFilter);
+  }, [activeFilter, appointments]);
+
+  if (loading) {
+    return (
+      <Layout minimalHeader>
+        <div className="container px-4 py-16">Loading appointments...</div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout minimalHeader>
+        <div className="container px-4 py-16">{error}</div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout minimalHeader>
@@ -109,7 +105,7 @@ const PatientAppointments = () => {
           <div className="mx-auto max-w-6xl space-y-8">
             <div className="space-y-4">
               <Link
-                to="/patient/dashboard"
+                to={`/patient/${patientId}/dashboard`}
                 className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-accent/90 focus-visible:outline-offset-4 no-underline"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -135,27 +131,27 @@ const PatientAppointments = () => {
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <article className="rounded-2xl border bg-card p-6 shadow-sm">
                 <p className="text-sm text-muted-foreground">Total appointments</p>
-                <p className="mt-3 text-4xl font-bold text-foreground">{mockAppointments.length}</p>
+                <p className="mt-3 text-4xl font-bold text-foreground">{appointments.length}</p>
               </article>
 
               <article className="rounded-2xl border bg-card p-6 shadow-sm">
                 <p className="text-sm text-muted-foreground">Pending</p>
                 <p className="mt-3 text-4xl font-bold text-foreground">
-                  {mockAppointments.filter(a => a.status === 'Pending').length}
+                  {appointments.filter(a => a.status === 'Pending').length}
                 </p>
               </article>
 
               <article className="rounded-2xl border bg-card p-6 shadow-sm">
                 <p className="text-sm text-muted-foreground">Confirmed</p>
                 <p className="mt-3 text-4xl font-bold text-foreground">
-                  {mockAppointments.filter(a => a.status === 'Confirmed').length}
+                  {appointments.filter(a => a.status === 'Confirmed').length}
                 </p>
               </article>
 
               <article className="rounded-2xl border bg-card p-6 shadow-sm">
                 <p className="text-sm text-muted-foreground">Completed</p>
                 <p className="mt-3 text-4xl font-bold text-foreground">
-                  {mockAppointments.filter(a => a.status === 'Completed').length}
+                  {appointments.filter(a => a.status === 'Completed').length}
                 </p>
               </article>
             </div>
@@ -290,7 +286,7 @@ const PatientAppointments = () => {
 
                       <div className="flex flex-col gap-3 xl:min-w-[180px]">
                         <Button asChild size="lg" className="w-full no-underline hover:bg-accent hover:text-accent-foreground">
-                          <Link to="/patient/book">Book Again</Link>
+                          <Link to={`/patient/${patientId}/book`}>Book Again</Link>
                         </Button>
                       </div>
                     </div>

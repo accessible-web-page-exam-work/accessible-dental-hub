@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
+import { useParams } from 'react-router-dom';
+
 
 const PatientDashboard = () => {
+    const { patientId } = useParams();
   return (
     <Layout minimalHeader>
       <section className="py-16 md:py-24" aria-labelledby="patient-dashboard-heading">
@@ -38,7 +41,7 @@ const PatientDashboard = () => {
                 </p>
                 <div className="pt-6">
                   <Button asChild size="lg" className="w-full min-h-touch hover:bg-accent hover:text-accent-foreground no-underline">
-                    <Link to="/patient/appointments">View Appointments</Link>
+                   <Link to={`/patient/${patientId}/appointments`}>View Appointments</Link>
                   </Button>
                 </div>
               </article>
@@ -50,7 +53,7 @@ const PatientDashboard = () => {
                 </p>
                 <div className="pt-6">
                   <Button asChild size="lg" className="w-full min-h-touch hover:bg-accent hover:text-accent-foreground no-underline">
-                    <Link to="/patient/book">Book Appointment</Link>
+                    <Link to={`/patient/${patientId}/book`}>Book Appointment</Link>
                   </Button>
                 </div>
               </article>
