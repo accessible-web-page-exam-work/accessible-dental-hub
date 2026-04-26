@@ -10,6 +10,7 @@ export interface LoginResponse {
   roles: string[];
   email?: string;
   userId?: string;
+  patientId?: number | null;
 }
 
 export const login = async (data: LoginRequest) => {

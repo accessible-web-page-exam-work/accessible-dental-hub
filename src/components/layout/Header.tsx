@@ -28,7 +28,7 @@ export function Header({ minimal = false }: HeaderProps) {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("roles");
-    navigate("/receptionist/login");
+    navigate("/");
   };
 
   return (
