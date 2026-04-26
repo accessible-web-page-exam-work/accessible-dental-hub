@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { ThemeSwitcher } from '@/components/accessibility/ThemeSwitcher';
-import { Menu, X, Calendar, Phone, Home, Info } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { ThemeSwitcher } from "@/components/accessibility/ThemeSwitcher";
+import { Menu, X, Calendar, Phone, Home, Info, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const navItems = [
-  { href: '/', label: 'Home', icon: Home },
-  { href: '/services', label: 'Services', icon: Info },
-  { href: '/book', label: 'Book Appointment', icon: Calendar },
-  { href: '/contact', label: 'Contact', icon: Phone },
+  { href: "/", label: "Home", icon: Home },
+  { href: "/services", label: "Services", icon: Info },
+  { href: "/book", label: "Book Appointment", icon: Calendar },
+  { href: "/contact", label: "Contact", icon: Phone },
 ];
 
 type HeaderProps = {
@@ -20,6 +21,15 @@ export function Header({ minimal = false }: HeaderProps) {
   const location = useLocation();
 
   const isActive = (href: string) => location.pathname === href;
+  const navigate = useNavigate();
+
+  const token = localStorage.getItem("token");
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("roles");
+    navigate("/receptionist/login");
+  };
 
   return (
     <header
@@ -62,11 +72,11 @@ export function Header({ minimal = false }: HeaderProps) {
                   transition-colors min-h-touch
                   ${
                     isActive(href)
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-foreground hover:bg-secondary focus-visible:bg-secondary'
+                      ? "bg-primary text-primary-foreground"
+                      : "text-foreground hover:bg-secondary focus-visible:bg-secondary"
                   }
                 `}
-                aria-current={isActive(href) ? 'page' : undefined}
+                aria-current={isActive(href) ? "page" : undefined}
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />
                 {label}
@@ -77,6 +87,16 @@ export function Header({ minimal = false }: HeaderProps) {
 
         <div className="flex items-center gap-2">
           <ThemeSwitcher />
+          {token && (
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              size="sm"
+              className="hidden md:inline-flex"
+            >
+              Logout
+            </Button>
+          )}
 
           {!minimal && (
             <Button
@@ -86,7 +106,7 @@ export function Header({ minimal = false }: HeaderProps) {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-expanded={isMobileMenuOpen}
               aria-controls="mobile-menu"
-              aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             >
               {isMobileMenuOpen ? (
                 <X className="h-5 w-5" aria-hidden="true" />
@@ -115,11 +135,11 @@ export function Header({ minimal = false }: HeaderProps) {
                     transition-colors min-h-touch
                     ${
                       isActive(href)
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-foreground hover:bg-secondary focus-visible:bg-secondary'
+                        ? "bg-primary text-primary-foreground"
+                        : "text-foreground hover:bg-secondary focus-visible:bg-secondary"
                     }
                   `}
-                  aria-current={isActive(href) ? 'page' : undefined}
+                  aria-current={isActive(href) ? "page" : undefined}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Icon className="h-5 w-5" aria-hidden="true" />
@@ -127,6 +147,26 @@ export function Header({ minimal = false }: HeaderProps) {
                 </Link>
               </li>
             ))}
+            {token && (
+              <li>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="
+                  flex w-full justify-start items-center gap-3 px-4 py-3 rounded-md
+                  text-base font-medium min-h-touch
+                  text-foreground hover:bg-secondary hover:text-accent focus-visible:bg-secondary
+                "
+                >
+                  <LogOut className="h-5 w-5" aria-hidden="true" />
+                  Logout
+                </Button>
+              </li>
+            )}
           </ul>
         </nav>
       )}

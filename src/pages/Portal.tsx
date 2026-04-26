@@ -85,7 +85,7 @@ const Portal = () => {
 
                 <div className="pt-6">
                   <Button asChild size="lg" className="w-full min-h-touch hover:bg-accent hover:text-accent-foreground no-underline">
-                    <Link to="/receptionist">
+                    <Link to="/receptionist/login">
                       Open Dashboard
                       <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                     </Link>
