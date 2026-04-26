@@ -1,22 +1,23 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Layout } from '@/components/layout/Layout';
+import React, { useEffect, useMemo, useState } from "react";
+import { Layout } from "@/components/layout/Layout";
 import {
   getAllAppointments,
   updateAppointmentStatus,
   getAvailableSlots,
   confirmAppointmentWithSlot,
-} from '@/services/api/appointments';
-import { Button } from '@/components/ui/button';
+} from "@/services/api/appointments";
+import { Button } from "@/components/ui/button";
 import AvailableSlotsModal, {
   AppointmentSlot,
   ReceptionistAppointment,
-} from '@/components/receptionist/AvailableSlotsModal';
+} from "@/components/receptionist/AvailableSlotsModal";
+import { createPatientAccount } from "@/services/api/patients";
 
 interface Appointment extends ReceptionistAppointment {
   patientId: number;
   treatmentType?: string | null;
   notes?: string | null;
-  status: 'Pending' | 'Confirmed' | 'Cancelled';
+  status: "Pending" | "Confirmed" | "Cancelled";
   preferredContactMethod?: string | null;
   preferredContactTime?: string | null;
   communicationNeeds?: string | null;
@@ -26,33 +27,38 @@ interface Appointment extends ReceptionistAppointment {
   isNewPatient?: boolean;
 }
 
-type FilterStatus = 'All' | 'Pending' | 'Confirmed' | 'Cancelled';
+type FilterStatus = "All" | "Pending" | "Confirmed" | "Cancelled";
 
 export default function ReceptionistDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdatingId, setIsUpdatingId] = useState<number | null>(null);
-  const [error, setError] = useState('');
-  const [activeFilter, setActiveFilter] = useState<FilterStatus>('Pending');
+  const [error, setError] = useState("");
+  const [activeFilter, setActiveFilter] = useState<FilterStatus>("Pending");
 
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
   const [availableSlots, setAvailableSlots] = useState<AppointmentSlot[]>([]);
   const [isSlotsLoading, setIsSlotsLoading] = useState(false);
   const [isConfirmingSlot, setIsConfirmingSlot] = useState<number | null>(null);
   const [isSlotModalOpen, setIsSlotModalOpen] = useState(false);
+  const [isCreatingAccountId, setIsCreatingAccountId] = useState<number | null>(
+    null,
+  );
+  const [successMessage, setSuccessMessage] = useState("");
 
   const loadAppointments = async () => {
     try {
-      setError('');
+      setError("");
       setIsLoading(true);
 
       const response = await getAllAppointments();
-      const data = Array.isArray(response) ? response : response.data ?? [];
+      const data = Array.isArray(response) ? response : (response.data ?? []);
 
       setAppointments(data);
     } catch (err) {
-      console.error('Failed to load appointments:', err);
-      setError('Could not load appointment requests.');
+      console.error("Failed to load appointments:", err);
+      setError("Could not load appointment requests.");
     } finally {
       setIsLoading(false);
     }
@@ -64,21 +70,21 @@ export default function ReceptionistDashboard() {
 
   const handleOpenSlots = async (appointment: Appointment) => {
     try {
-      setError('');
+      setError("");
       setSelectedAppointment(appointment);
       setIsSlotModalOpen(true);
       setIsSlotsLoading(true);
 
       const response = await getAvailableSlots(
         appointment.requestedDate,
-        appointment.requestedTime
+        appointment.requestedTime,
       );
 
-      const data = Array.isArray(response) ? response : response.data ?? [];
+      const data = Array.isArray(response) ? response : (response.data ?? []);
       setAvailableSlots(data);
     } catch (err) {
-      console.error('Failed to load available slots:', err);
-      setError('Could not load available slots.');
+      console.error("Failed to load available slots:", err);
+      setError("Could not load available slots.");
       setAvailableSlots([]);
     } finally {
       setIsSlotsLoading(false);
@@ -91,9 +97,12 @@ export default function ReceptionistDashboard() {
     setAvailableSlots([]);
   };
 
-  const handleConfirmWithSlot = async (appointmentId: number, slotId: number) => {
+  const handleConfirmWithSlot = async (
+    appointmentId: number,
+    slotId: number,
+  ) => {
     try {
-      setError('');
+      setError("");
       setIsConfirmingSlot(slotId);
 
       await confirmAppointmentWithSlot(appointmentId, slotId);
@@ -101,67 +110,92 @@ export default function ReceptionistDashboard() {
       handleCloseSlotsModal();
       await loadAppointments();
     } catch (err) {
-      console.error('Failed to confirm appointment with slot:', err);
-      setError('Could not confirm appointment with the selected slot.');
+      console.error("Failed to confirm appointment with slot:", err);
+      setError("Could not confirm appointment with the selected slot.");
     } finally {
       setIsConfirmingSlot(null);
     }
   };
 
-  const handleStatusUpdate = async (appointmentId: number, status: 'Cancelled') => {
+  const handleStatusUpdate = async (
+    appointmentId: number,
+    status: "Cancelled",
+  ) => {
     try {
       setIsUpdatingId(appointmentId);
       await updateAppointmentStatus(appointmentId, status);
       await loadAppointments();
     } catch (err) {
       console.error(`Failed to update appointment ${appointmentId}:`, err);
-      setError('Could not update appointment status.');
+      setError("Could not update appointment status.");
     } finally {
       setIsUpdatingId(null);
     }
   };
 
+  const handleCreatePatientAccount = async (patientId: number) => {
+    try {
+      setError("");
+      setSuccessMessage("");
+      setIsCreatingAccountId(patientId);
+
+      await createPatientAccount(patientId);
+
+      setSuccessMessage("Patient account created successfully.");
+      await loadAppointments();
+    } catch (err) {
+      console.error("Failed to create patient account:", err);
+      setError("Could not create patient account.");
+    } finally {
+      setIsCreatingAccountId(null);
+    }
+  };
+
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('sv-SE', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("sv-SE", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
   const formatTimeLabel = (time?: string | null) => {
-    if (!time) return 'Not specified';
+    if (!time) return "Not specified";
 
     const map: Record<string, string> = {
-      morning: 'Morning',
-      afternoon: 'Afternoon',
-      evening: 'Evening',
+      morning: "Morning",
+      afternoon: "Afternoon",
+      evening: "Evening",
     };
 
     return map[time.toLowerCase()] || time;
   };
 
-  const getStatusBadgeClass = (status: Appointment['status']) => {
+  const getStatusBadgeClass = (status: Appointment["status"]) => {
     switch (status) {
-      case 'Confirmed':
-        return 'bg-emerald-100 text-emerald-800 border border-emerald-200';
-      case 'Cancelled':
-        return 'bg-rose-100 text-rose-800 border border-rose-200';
+      case "Confirmed":
+        return "bg-emerald-100 text-emerald-800 border border-emerald-200";
+      case "Cancelled":
+        return "bg-rose-100 text-rose-800 border border-rose-200";
       default:
-        return 'bg-amber-100 text-amber-800 border border-amber-200';
+        return "bg-amber-100 text-amber-800 border border-amber-200";
     }
   };
 
   const filteredAppointments = useMemo(() => {
-    if (activeFilter === 'All') return appointments;
-    return appointments.filter((appointment) => appointment.status === activeFilter);
+    if (activeFilter === "All") return appointments;
+    return appointments.filter(
+      (appointment) => appointment.status === activeFilter,
+    );
   }, [appointments, activeFilter]);
 
   const stats = useMemo(() => {
     return {
       total: appointments.length,
-      pending: appointments.filter((a) => a.status === 'Pending').length,
-      withSupportNeeds: appointments.filter((a) => !!a.communicationNeeds?.trim()).length,
+      pending: appointments.filter((a) => a.status === "Pending").length,
+      withSupportNeeds: appointments.filter(
+        (a) => !!a.communicationNeeds?.trim(),
+      ).length,
       withNotes: appointments.filter((a) => !!a.notes?.trim()).length,
     };
   }, [appointments]);
@@ -178,8 +212,8 @@ export default function ReceptionistDashboard() {
       onClick={() => setActiveFilter(value)}
       className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
         activeFilter === value
-          ? 'border-primary bg-primary text-primary-foreground'
-          : 'border-border bg-background text-foreground hover:bg-secondary'
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-border bg-background text-foreground hover:bg-secondary"
       }`}
       aria-pressed={activeFilter === value}
     >
@@ -199,30 +233,38 @@ export default function ReceptionistDashboard() {
               Appointment Requests Dashboard
             </h1>
             <p className="max-w-3xl text-muted-foreground">
-              Review pending requests, identify communication or accessibility needs quickly,
-              and confirm or cancel appointments efficiently.
+              Review pending requests, identify communication or accessibility
+              needs quickly, and confirm or cancel appointments efficiently.
             </p>
           </section>
 
           <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-2xl border bg-card p-5 shadow-sm">
               <p className="text-sm text-muted-foreground">Total loaded</p>
-              <p className="mt-2 text-3xl font-bold text-foreground">{stats.total}</p>
+              <p className="mt-2 text-3xl font-bold text-foreground">
+                {stats.total}
+              </p>
             </div>
 
             <div className="rounded-2xl border bg-card p-5 shadow-sm">
               <p className="text-sm text-muted-foreground">Pending requests</p>
-              <p className="mt-2 text-3xl font-bold text-foreground">{stats.pending}</p>
+              <p className="mt-2 text-3xl font-bold text-foreground">
+                {stats.pending}
+              </p>
             </div>
 
             <div className="rounded-2xl border bg-card p-5 shadow-sm">
               <p className="text-sm text-muted-foreground">Support needs</p>
-              <p className="mt-2 text-3xl font-bold text-foreground">{stats.withSupportNeeds}</p>
+              <p className="mt-2 text-3xl font-bold text-foreground">
+                {stats.withSupportNeeds}
+              </p>
             </div>
 
             <div className="rounded-2xl border bg-card p-5 shadow-sm">
               <p className="text-sm text-muted-foreground">With notes</p>
-              <p className="mt-2 text-3xl font-bold text-foreground">{stats.withNotes}</p>
+              <p className="mt-2 text-3xl font-bold text-foreground">
+                {stats.withNotes}
+              </p>
             </div>
           </section>
 
@@ -232,6 +274,12 @@ export default function ReceptionistDashboard() {
             <FilterButton label="Confirmed" value="Confirmed" />
             <FilterButton label="Cancelled" value="Cancelled" />
           </section>
+
+          {successMessage && (
+            <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-800">
+              {successMessage}
+            </div>
+          )}
 
           {error && (
             <div
@@ -254,11 +302,15 @@ export default function ReceptionistDashboard() {
           ) : (
             <section className="space-y-5">
               {filteredAppointments.map((appointment) => {
-                const hasSupportNeeds = !!appointment.communicationNeeds?.trim();
+                const hasSupportNeeds =
+                  !!appointment.communicationNeeds?.trim();
                 const hasNotes = !!appointment.notes?.trim();
-                const isPhonePreferred = appointment.preferredContactMethod === 'Phone';
-                const isEmailPreferred = appointment.preferredContactMethod === 'Email';
-                const isSmsPreferred = appointment.preferredContactMethod === 'SMS';
+                const isPhonePreferred =
+                  appointment.preferredContactMethod === "Phone";
+                const isEmailPreferred =
+                  appointment.preferredContactMethod === "Email";
+                const isSmsPreferred =
+                  appointment.preferredContactMethod === "SMS";
 
                 return (
                   <article
@@ -279,7 +331,7 @@ export default function ReceptionistDashboard() {
 
                             <span
                               className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${getStatusBadgeClass(
-                                appointment.status
+                                appointment.status,
                               )}`}
                             >
                               {appointment.status}
@@ -312,7 +364,7 @@ export default function ReceptionistDashboard() {
                         </div>
 
                         <div className="flex flex-wrap gap-3">
-                          {appointment.status === 'Pending' && (
+                          {appointment.status === "Pending" && (
                             <>
                               <Button
                                 type="button"
@@ -325,12 +377,37 @@ export default function ReceptionistDashboard() {
                               <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => handleStatusUpdate(appointment.id, 'Cancelled')}
+                                onClick={() =>
+                                  handleStatusUpdate(
+                                    appointment.id,
+                                    "Cancelled",
+                                  )
+                                }
                                 disabled={isUpdatingId === appointment.id}
                                 className="min-w-[120px]"
                               >
                                 Cancel
                               </Button>
+                              {appointment.isNewPatient && (
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  onClick={() =>
+                                    handleCreatePatientAccount(
+                                      appointment.patientId,
+                                    )
+                                  }
+                                  disabled={
+                                    isCreatingAccountId ===
+                                    appointment.patientId
+                                  }
+                                  className="min-w-[160px]"
+                                >
+                                  {isCreatingAccountId === appointment.patientId
+                                    ? "Creating..."
+                                    : "Create Account"}
+                                </Button>
+                              )}
                             </>
                           )}
                         </div>
@@ -338,64 +415,82 @@ export default function ReceptionistDashboard() {
 
                       <dl className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
                         <div>
-                          <dt className="text-sm text-muted-foreground">Date</dt>
+                          <dt className="text-sm text-muted-foreground">
+                            Date
+                          </dt>
                           <dd className="mt-1 font-semibold text-foreground">
                             {formatDate(appointment.requestedDate)}
                           </dd>
                         </div>
 
                         <div>
-                          <dt className="text-sm text-muted-foreground">Time</dt>
+                          <dt className="text-sm text-muted-foreground">
+                            Time
+                          </dt>
                           <dd className="mt-1 font-semibold text-foreground">
                             {formatTimeLabel(appointment.requestedTime)}
                           </dd>
                         </div>
 
                         <div>
-                          <dt className="text-sm text-muted-foreground">Treatment</dt>
+                          <dt className="text-sm text-muted-foreground">
+                            Treatment
+                          </dt>
                           <dd className="mt-1 font-semibold text-foreground">
-                            {appointment.treatmentType || 'Not specified'}
+                            {appointment.treatmentType || "Not specified"}
                           </dd>
                         </div>
 
                         <div>
-                          <dt className="text-sm text-muted-foreground">Best contact method</dt>
+                          <dt className="text-sm text-muted-foreground">
+                            Best contact method
+                          </dt>
                           <dd className="mt-1 font-semibold text-foreground">
-                            {appointment.preferredContactMethod || 'Not specified'}
+                            {appointment.preferredContactMethod ||
+                              "Not specified"}
                           </dd>
                         </div>
 
                         <div>
-                          <dt className="text-sm text-muted-foreground">Best time to reach</dt>
+                          <dt className="text-sm text-muted-foreground">
+                            Best time to reach
+                          </dt>
                           <dd className="mt-1 font-semibold text-foreground">
-                            {appointment.preferredContactTime || 'Not specified'}
+                            {appointment.preferredContactTime ||
+                              "Not specified"}
                           </dd>
                         </div>
 
                         <div>
-                          <dt className="text-sm text-muted-foreground">Phone</dt>
+                          <dt className="text-sm text-muted-foreground">
+                            Phone
+                          </dt>
                           <dd className="mt-1 font-semibold text-foreground">
-                            {appointment.phoneNumber || 'Not available'}
+                            {appointment.phoneNumber || "Not available"}
                           </dd>
                         </div>
 
                         <div>
-                          <dt className="text-sm text-muted-foreground">Email</dt>
+                          <dt className="text-sm text-muted-foreground">
+                            Email
+                          </dt>
                           <dd className="mt-1 font-semibold text-foreground break-all">
-                            {appointment.email || 'Not available'}
+                            {appointment.email || "Not available"}
                           </dd>
                         </div>
 
                         <div>
-                          <dt className="text-sm text-muted-foreground">Recommended next step</dt>
+                          <dt className="text-sm text-muted-foreground">
+                            Recommended next step
+                          </dt>
                           <dd className="mt-1 font-semibold text-foreground">
                             {isPhonePreferred && appointment.phoneNumber
-                              ? 'Call patient'
+                              ? "Call patient"
                               : isEmailPreferred && appointment.email
-                              ? 'Send email'
-                              : isSmsPreferred && appointment.phoneNumber
-                              ? 'Send SMS'
-                              : 'Review request details'}
+                                ? "Send email"
+                                : isSmsPreferred && appointment.phoneNumber
+                                  ? "Send SMS"
+                                  : "Review request details"}
                           </dd>
                         </div>
                       </dl>
@@ -415,7 +510,9 @@ export default function ReceptionistDashboard() {
 
                           {hasNotes && (
                             <section className="rounded-xl border border-violet-200 bg-violet-50 p-4">
-                              <h3 className="text-sm font-semibold text-violet-900">Notes</h3>
+                              <h3 className="text-sm font-semibold text-violet-900">
+                                Notes
+                              </h3>
                               <p className="mt-2 whitespace-pre-line text-sm text-violet-950">
                                 {appointment.notes}
                               </p>
