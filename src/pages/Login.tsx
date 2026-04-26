@@ -1,16 +1,22 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { login } from "@/services/api/auth";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 
-const ReceptionistLogin = () => {
+const Login = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  const location = useLocation();
+
+  const expectedRole = location.pathname.startsWith("/receptionist")
+    ? "Receptionist"
+    : "Patient";
 
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,15 +39,34 @@ const ReceptionistLogin = () => {
     try {
       const result = await login(formData);
 
-      if (!result.roles.includes("Receptionist")) {
-        setErrorMessage("You do not have receptionist access.");
+      if (
+        expectedRole === "Receptionist" &&
+        result.roles.includes("Receptionist")
+      ) {
+        localStorage.setItem("token", result.token);
+        localStorage.setItem("roles", JSON.stringify(result.roles));
+
+        navigate("/receptionist");
         return;
       }
 
-      localStorage.setItem("token", result.token);
-      localStorage.setItem("roles", JSON.stringify(result.roles));
+      if (
+        expectedRole === "Patient" &&
+        result.roles.includes("Patient") &&
+        result.patientId
+      ) {
+        localStorage.setItem("token", result.token);
+        localStorage.setItem("roles", JSON.stringify(result.roles));
+        localStorage.setItem("patientId", result.patientId.toString());
 
-      navigate("/receptionist");
+        navigate(`/patient/${result.patientId}/dashboard`);
+        return;
+      }
+
+      setErrorMessage(
+        `This account does not have ${expectedRole.toLowerCase()} access.`,
+      );
+
     } catch {
       setErrorMessage("Invalid email or password.");
     } finally {
@@ -55,11 +80,14 @@ const ReceptionistLogin = () => {
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-md rounded-2xl border bg-card p-6 shadow-sm md:p-8">
             <h1 className="mb-6 text-2xl font-bold text-foreground">
-              Receptionist Login
+              {expectedRole} Login
             </h1>
 
             {errorMessage && (
-              <div role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div
+                role="alert"
+                className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              >
                 {errorMessage}
               </div>
             )}
@@ -95,7 +123,12 @@ const ReceptionistLogin = () => {
                 />
               </div>
 
-              <Button type="submit" size="lg" disabled={isSubmitting} className="w-full">
+              <Button
+                type="submit"
+                size="lg"
+                disabled={isSubmitting}
+                className="w-full"
+              >
                 {isSubmitting ? "Signing in..." : "Sign In"}
               </Button>
             </form>
@@ -106,4 +139,4 @@ const ReceptionistLogin = () => {
   );
 };
 
-export default ReceptionistLogin;
+export default Login;

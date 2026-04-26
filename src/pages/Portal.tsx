@@ -1,8 +1,8 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Layout } from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
-import { Calendar, Users, UserRound, ArrowRight } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Layout } from "@/components/layout/Layout";
+import { Button } from "@/components/ui/button";
+import { Calendar, Users, UserRound, ArrowRight } from "lucide-react";
 
 const Portal = () => {
   return (
@@ -21,44 +21,50 @@ const Portal = () => {
                 How would you like to continue?
               </h1>
               <p className="mx-auto max-w-2xl text-fluid-base text-muted-foreground">
-                Choose the option that fits your role. Guests can book appointments,
-                staff can manage requests, and registered patient access can be added later.
+                Choose the option that fits your role. Guests can book
+                appointments, staff can manage requests, and registered patients
+                can access their appointment portal.
               </p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                <article className="rounded-2xl border bg-card p-6 shadow-sm flex flex-col justify-between">
+              <article className="rounded-2xl border bg-card p-6 shadow-sm flex flex-col justify-between">
                 <div className="space-y-4">
-                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Calendar className="h-6 w-6" aria-hidden="true" />
-                    </div>
+                  </div>
 
-                    <div className="space-y-2">
+                  <div className="space-y-2">
                     <h2 className="text-xl font-semibold text-foreground">
-                        Continue as Guest
+                      Continue as Guest
                     </h2>
                     <p className="text-muted-foreground">
-                        Enter the public website to explore services, accessibility information,
-                        and book an appointment when you are ready.
+                      Enter the public website to explore services,
+                      accessibility information, and book an appointment when
+                      you are ready.
                     </p>
-                    </div>
+                  </div>
 
-                    <ul className="space-y-2 text-sm text-muted-foreground">
+                  <ul className="space-y-2 text-sm text-muted-foreground">
                     <li>Browse services</li>
                     <li>Read accessibility information</li>
                     <li>Book an appointment online</li>
-                    </ul>
+                  </ul>
                 </div>
 
                 <div className="pt-6">
-                    <Button asChild size="lg" className="w-full min-h-touch hover:bg-accent hover:text-accent-foreground no-underline">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="w-full min-h-touch hover:bg-accent hover:text-accent-foreground no-underline"
+                  >
                     <Link to="/home">
-                        Enter Website
-                        <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
+                      Enter Website
+                      <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                     </Link>
-                    </Button>
+                  </Button>
                 </div>
-                </article>
+              </article>
 
               <article className="rounded-2xl border bg-card p-6 shadow-sm flex flex-col justify-between">
                 <div className="space-y-4">
@@ -71,8 +77,8 @@ const Portal = () => {
                       Receptionist / Staff
                     </h2>
                     <p className="text-muted-foreground">
-                      Review incoming appointment requests, see patient communication needs,
-                      and confirm or cancel bookings.
+                      Review incoming appointment requests, see patient
+                      communication needs, and confirm or cancel bookings.
                     </p>
                   </div>
 
@@ -84,7 +90,11 @@ const Portal = () => {
                 </div>
 
                 <div className="pt-6">
-                  <Button asChild size="lg" className="w-full min-h-touch hover:bg-accent hover:text-accent-foreground no-underline">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="w-full min-h-touch hover:bg-accent hover:text-accent-foreground no-underline"
+                  >
                     <Link to="/receptionist/login">
                       Open Dashboard
                       <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
@@ -93,9 +103,9 @@ const Portal = () => {
                 </div>
               </article>
 
-              <article className="rounded-2xl border bg-card p-6 shadow-sm flex flex-col justify-between opacity-80">
+              <article className="rounded-2xl border bg-card p-6 shadow-sm flex flex-col justify-between">
                 <div className="space-y-4">
-                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-secondary text-foreground">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <UserRound className="h-6 w-6" aria-hidden="true" />
                   </div>
 
@@ -104,8 +114,8 @@ const Portal = () => {
                       Registered Patient
                     </h2>
                     <p className="text-muted-foreground">
-                      Future patient access for viewing bookings, managing appointments,
-                      and receiving updates in one place.
+                      Log in to view your appointments, request new bookings,
+                      and manage your patient portal.
                     </p>
                   </div>
 
@@ -117,8 +127,15 @@ const Portal = () => {
                 </div>
 
                 <div className="pt-6">
-                  <Button size="lg" variant="secondary" className="w-full min-h-touch" disabled>
-                    Coming Soon
+                  <Button
+                    asChild
+                    size="lg"
+                    className="w-full min-h-touch hover:bg-accent hover:text-accent-foreground no-underline"
+                  >
+                    <Link to="/patient/login">
+                      Patient Login
+                      <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
+                    </Link>
                   </Button>
                 </div>
               </article>
