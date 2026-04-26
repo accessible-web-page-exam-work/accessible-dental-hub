@@ -14,6 +14,8 @@ import Portal from "./pages/Portal";
 import PatientDashboard from "./pages/PatientDashboard";
 import PatientBook from "./pages/PatientBook";
 import PatientAppointments from "./pages/PatientAppointments";
+import ReceptionistLogin from "./pages/ReceptionistLogin";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +32,7 @@ const App = () => (
             <Route path="/book" element={<BookAppointment />} />
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/receptionist" element={<ReceptionistDashboard />} />
+            <Route path="/receptionist" element={<ProtectedRoute><ReceptionistDashboard /></ProtectedRoute>} />
             {/* <Route path="/patient/dashboard" element={<PatientDashboard />} />
             <Route path="/patient/book" element={<PatientBook />} />
             <Route path="/patient/appointments" element={<PatientAppointments />} /> */}
@@ -38,6 +40,7 @@ const App = () => (
             <Route path="/patient/:patientId/dashboard" element={<PatientDashboard />} />
             <Route path="/patient/:patientId/appointments" element={<PatientAppointments />} />
             <Route path="/patient/:patientId/book" element={<PatientBook />} />
+            <Route path="/receptionist/login" element={<ReceptionistLogin />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
