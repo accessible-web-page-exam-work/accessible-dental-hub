@@ -13,7 +13,18 @@ export interface LoginResponse {
   patientId?: number | null;
 }
 
+export interface ResetPasswordRequest {
+  email: string;
+  token: string;
+  newPassword: string;
+}
+
 export const login = async (data: LoginRequest) => {
   const response = await api.post<LoginResponse>('/Auth/login', data);
+  return response.data;
+};
+
+export const resetPassword = async (data: ResetPasswordRequest) => {
+  const response = await api.post("/Auth/reset-password", data);
   return response.data;
 };
