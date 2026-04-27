@@ -16,6 +16,7 @@ import PatientBook from "./pages/PatientBook";
 import PatientAppointments from "./pages/PatientAppointments";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
 
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/patient/:patientId/book" element={<PatientBook />} />
             <Route path="/receptionist/login" element={<Login />} />
             <Route path="/patient/login" element={<Login />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

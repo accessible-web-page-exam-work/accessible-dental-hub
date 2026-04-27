@@ -388,27 +388,26 @@ export default function ReceptionistDashboard() {
                               >
                                 Cancel
                               </Button>
-                              {appointment.isNewPatient && (
-                                <Button
-                                  type="button"
-                                  variant="secondary"
-                                  onClick={() =>
-                                    handleCreatePatientAccount(
-                                      appointment.patientId,
-                                    )
-                                  }
-                                  disabled={
-                                    isCreatingAccountId ===
-                                    appointment.patientId
-                                  }
-                                  className="min-w-[160px]"
-                                >
-                                  {isCreatingAccountId === appointment.patientId
-                                    ? "Creating..."
-                                    : "Create Account"}
-                                </Button>
-                              )}
                             </>
+                          )}
+
+                          {appointment.isNewPatient && (
+                            <Button
+                              type="button"
+                              onClick={() =>
+                                handleCreatePatientAccount(
+                                  appointment.patientId,
+                                )
+                              }
+                              disabled={
+                                isCreatingAccountId === appointment.patientId
+                              }
+                              className="min-w-[160px]"
+                            >
+                              {isCreatingAccountId === appointment.patientId
+                                ? "Creating..."
+                                : "Create Account"}
+                            </Button>
                           )}
                         </div>
                       </div>
