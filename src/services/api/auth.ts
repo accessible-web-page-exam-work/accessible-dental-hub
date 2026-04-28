@@ -19,6 +19,20 @@ export interface ResetPasswordRequest {
   newPassword: string;
 }
 
+export interface MeResponse {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  errors?: string[] | null;
+  data: T;
+}
+
 export const login = async (data: LoginRequest) => {
   const response = await api.post<LoginResponse>('/Auth/login', data);
   return response.data;
@@ -26,5 +40,10 @@ export const login = async (data: LoginRequest) => {
 
 export const resetPassword = async (data: ResetPasswordRequest) => {
   const response = await api.post("/Auth/reset-password", data);
+  return response.data;
+};
+
+export const getMe = async () => {
+  const response = await api.get<ApiResponse<MeResponse>>("/patients/me");
   return response.data;
 };

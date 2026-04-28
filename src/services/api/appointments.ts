@@ -113,3 +113,22 @@ export const createPatientAppointment = async (
 
   return response.data;
 };
+
+export const createMyAppointment = async (
+  payload: CreatePatientAppointmentRequestDto
+) => {
+  const response = await api.post<ApiResponse<PatientAppointment>>(
+    "/patients/me/appointments",
+    payload
+  );
+
+  return response.data;
+};
+
+export const getMyAppointments = async () => {
+  const response = await api.get<ApiResponse<PatientAppointment[]>>(
+    "/patients/me/appointments"
+  );
+
+  return response.data;
+};

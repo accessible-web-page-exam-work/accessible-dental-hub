@@ -35,13 +35,9 @@ const App = () => (
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/receptionist" element={<ProtectedRoute><ReceptionistDashboard /></ProtectedRoute>} />
-            {/* <Route path="/patient/dashboard" element={<PatientDashboard />} />
-            <Route path="/patient/book" element={<PatientBook />} />
-            <Route path="/patient/appointments" element={<PatientAppointments />} /> */}
-
-            <Route path="/patient/:patientId/dashboard" element={<PatientDashboard />} />
-            <Route path="/patient/:patientId/appointments" element={<ProtectedRoute><PatientAppointments /></ProtectedRoute>} />
-            <Route path="/patient/:patientId/book" element={<PatientBook />} />
+            <Route path="/patient/dashboard" element={<ProtectedRoute><PatientDashboard /></ProtectedRoute>} />
+            <Route path="/patient/book" element={<ProtectedRoute><PatientBook /></ProtectedRoute>} />
+            <Route path="/patient/appointments" element={<ProtectedRoute><PatientAppointments /></ProtectedRoute>} />
             <Route path="/receptionist/login" element={<Login />} />
             <Route path="/patient/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />

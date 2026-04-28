@@ -149,7 +149,7 @@ const Portal = () => {
                     <Link
                       to={
                         isLoggedIn && isPatient
-                          ? `/patient/${localStorage.getItem("patientId")}/dashboard`
+                          ? "/patient/dashboard"
                           : "/patient/login"
                       }
                     >

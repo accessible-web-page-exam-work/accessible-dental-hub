@@ -9,12 +9,10 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { createPatientAppointment } from "@/services/api/appointments";
-import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { createMyAppointment } from "@/services/api/appointments";
 
 const PatientBook = () => {
-  const { patientId } = useParams<{ patientId: string }>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -43,17 +41,12 @@ const PatientBook = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!patientId) {
-      setErrorMessage("Patient ID is missing");
-      return;
-    }
-
     setIsSubmitting(true);
     setErrorMessage("");
     setSuccessMessage("");
 
     try {
-      const result = await createPatientAppointment(Number(patientId), {
+      const result = await createMyAppointment({
         requestedDate: formData.requestedDate,
         requestedTime: formData.requestedTime,
         treatmentType: formData.treatmentType,
@@ -72,7 +65,7 @@ const PatientBook = () => {
       console.log("Booking created:", result);
       setSuccessMessage("Booking created successfully!");
       setTimeout(() => {
-        navigate(`/patient/${patientId}/dashboard`);
+        navigate(`/patient/dashboard`);
       }, 5000);
     } catch (error) {
       console.error("Booking request failed:", error);
@@ -92,7 +85,7 @@ const PatientBook = () => {
           <div className="mx-auto max-w-4xl space-y-8">
             <div className="space-y-4">
               <Link
-                to={`/patient/${patientId}/dashboard`}
+                to={`/patient/dashboard`}
                 className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-accent/90 focus-visible:outline-offset-4 no-underline"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -283,7 +276,7 @@ const PatientBook = () => {
                     size="lg"
                     className="min-h-touch hover:bg-accent hover:text-accent-foreground no-underline"
                   >
-                    <Link to={`/patient/${patientId}/dashboard`}>Cancel</Link>
+                    <Link to={`/patient/dashboard`}>Cancel</Link>
                   </Button>
 
                   <Button
