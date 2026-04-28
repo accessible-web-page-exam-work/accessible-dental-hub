@@ -5,6 +5,7 @@ import {
   updateAppointmentStatus,
   getAvailableSlots,
   confirmAppointmentWithSlot,
+  rescheduleAppointment,
 } from "@/services/api/appointments";
 import { Button } from "@/components/ui/button";
 import AvailableSlotsModal, {
@@ -12,6 +13,7 @@ import AvailableSlotsModal, {
   ReceptionistAppointment,
 } from "@/components/receptionist/AvailableSlotsModal";
 import { createPatientAccount } from "@/services/api/patients";
+import { set } from "date-fns";
 
 interface Appointment extends ReceptionistAppointment {
   patientId: number;
@@ -35,6 +37,7 @@ export default function ReceptionistDashboard() {
   const [isUpdatingId, setIsUpdatingId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterStatus>("Pending");
+  const [isRescheduling, setIsRescheduling] = useState(false);
 
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
@@ -95,6 +98,7 @@ export default function ReceptionistDashboard() {
     setIsSlotModalOpen(false);
     setSelectedAppointment(null);
     setAvailableSlots([]);
+    setIsRescheduling(false);
   };
 
   const handleConfirmWithSlot = async (
@@ -104,16 +108,22 @@ export default function ReceptionistDashboard() {
     try {
       setError("");
       setIsConfirmingSlot(slotId);
-
-      await confirmAppointmentWithSlot(appointmentId, slotId);
-
+      if (isRescheduling) {
+        await rescheduleAppointment(appointmentId, slotId);
+        setSuccessMessage("Appointment rescheduled successfully.");
+      } else {
+        await confirmAppointmentWithSlot(appointmentId, slotId);
+        setSuccessMessage("Appointment confirmed successfully.");
+      }
       handleCloseSlotsModal();
+      setIsRescheduling(false);
       await loadAppointments();
     } catch (err) {
       console.error("Failed to confirm appointment with slot:", err);
       setError("Could not confirm appointment with the selected slot.");
     } finally {
       setIsConfirmingSlot(null);
+      setIsRescheduling(false);
     }
   };
 
@@ -274,9 +284,12 @@ export default function ReceptionistDashboard() {
             <FilterButton label="Confirmed" value="Confirmed" />
             <FilterButton label="Cancelled" value="Cancelled" />
           </section>
-
           {successMessage && (
-            <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-800">
+            <div
+              role="status"
+              aria-live="polite"
+              className="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-800"
+            >
               {successMessage}
             </div>
           )}
@@ -417,8 +430,10 @@ export default function ReceptionistDashboard() {
 
                               <Button
                                 type="button"
-                                onClick={() => handleOpenSlots(appointment)}
-                                className="min-w-[140px]"
+                                onClick={() => {
+                                  setIsRescheduling(true);
+                                  handleOpenSlots(appointment);
+                                }}
                               >
                                 Reschedule
                               </Button>
