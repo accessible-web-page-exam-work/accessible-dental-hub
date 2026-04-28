@@ -132,3 +132,15 @@ export const getMyAppointments = async () => {
 
   return response.data;
 };
+
+export const rescheduleAppointment = async (
+  appointmentId: number,
+  slotId: number
+) => {
+  const response = await api.put(
+    `/appointments/${appointmentId}/reschedule`,
+    { slotId }
+  );
+
+  return response.data;
+};
