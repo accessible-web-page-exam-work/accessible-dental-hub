@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Users, UserRound, ArrowRight } from "lucide-react";
 
 const Portal = () => {
+  const token = localStorage.getItem("token");
+  const roles = JSON.parse(localStorage.getItem("roles") || "[]");
+
+  const isLoggedIn = !!token;
+  const isPatient = roles.includes("Patient");
+  const isReceptionist = roles.includes("Receptionist");
   return (
     <Layout minimalHeader>
       <section className="py-16 md:py-24" aria-labelledby="portal-heading">
@@ -95,8 +101,16 @@ const Portal = () => {
                     size="lg"
                     className="w-full min-h-touch hover:bg-accent hover:text-accent-foreground no-underline"
                   >
-                    <Link to="/receptionist/login">
-                      Open Dashboard
+                    <Link
+                      to={
+                        isLoggedIn && isReceptionist
+                          ? "/receptionist"
+                          : "/receptionist/login"
+                      }
+                    >
+                      {isLoggedIn && isReceptionist
+                        ? "Go to Dashboard"
+                        : "Open Dashboard"}
                       <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                     </Link>
                   </Button>
@@ -132,8 +146,16 @@ const Portal = () => {
                     size="lg"
                     className="w-full min-h-touch hover:bg-accent hover:text-accent-foreground no-underline"
                   >
-                    <Link to="/patient/login">
-                      Patient Login
+                    <Link
+                      to={
+                        isLoggedIn && isPatient
+                          ? `/patient/${localStorage.getItem("patientId")}/dashboard`
+                          : "/patient/login"
+                      }
+                    >
+                      {isLoggedIn && isPatient
+                        ? "Go to Dashboard"
+                        : "Patient Login"}
                       <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                     </Link>
                   </Button>
