@@ -119,7 +119,7 @@ export default function ReceptionistDashboard() {
 
   const handleStatusUpdate = async (
     appointmentId: number,
-    status: "Cancelled",
+    status: "Pending" | "Confirmed" | "Cancelled",
   ) => {
     try {
       setIsUpdatingId(appointmentId);
@@ -362,8 +362,8 @@ export default function ReceptionistDashboard() {
                               : `Patient ID: ${appointment.patientId}`}
                           </p>
                         </div>
-
                         <div className="flex flex-wrap gap-3">
+                          {/* Pending */}
                           {appointment.status === "Pending" && (
                             <>
                               <Button
@@ -377,12 +377,14 @@ export default function ReceptionistDashboard() {
                               <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() =>
-                                  handleStatusUpdate(
-                                    appointment.id,
-                                    "Cancelled",
-                                  )
-                                }
+                                onClick={() => {
+                                  if (confirm("Cancel this appointment?")) {
+                                    handleStatusUpdate(
+                                      appointment.id,
+                                      "Cancelled",
+                                    );
+                                  }
+                                }}
                                 disabled={isUpdatingId === appointment.id}
                                 className="min-w-[120px]"
                               >
@@ -391,6 +393,46 @@ export default function ReceptionistDashboard() {
                             </>
                           )}
 
+                          {/* Confirmed */}
+                          {appointment.status === "Confirmed" && (
+                            <>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => {
+                                  if (confirm("Cancel this appointment?")) {
+                                    handleStatusUpdate(
+                                      appointment.id,
+                                      "Cancelled",
+                                    );
+                                  }
+                                }}
+                                disabled={isUpdatingId === appointment.id}
+                                className="min-w-[160px]"
+                              >
+                                {isUpdatingId === appointment.id
+                                  ? "Cancelling..."
+                                  : "Cancel Appointment"}
+                              </Button>
+
+                              <Button
+                                type="button"
+                                onClick={() => handleOpenSlots(appointment)}
+                                className="min-w-[140px]"
+                              >
+                                Reschedule
+                              </Button>
+                            </>
+                          )}
+
+                          {/* Cancelled */}
+                          {appointment.status === "Cancelled" && (
+                            <span className="text-sm text-muted-foreground italic">
+                              Appointment cancelled
+                            </span>
+                          )}
+
+                          {/* New patient */}
                           {appointment.isNewPatient && (
                             <Button
                               type="button"
