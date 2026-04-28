@@ -59,7 +59,7 @@ const Login = () => {
         localStorage.setItem("roles", JSON.stringify(result.roles));
         localStorage.setItem("patientId", result.patientId.toString());
 
-        navigate(`/patient/${result.patientId}/dashboard`);
+        navigate("/patient/dashboard")
         return;
       }
 

@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Layout } from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from "react";
+import { Layout } from "@/components/layout/Layout";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import {
   ArrowLeft,
   CalendarDays,
@@ -9,33 +9,35 @@ import {
   FileText,
   Stethoscope,
   MapPin,
-} from 'lucide-react';
-import { getPatientAppointments, type PatientAppointment } from '@/services/api/appointments';
-import { useParams } from 'react-router-dom';
+} from "lucide-react";
+import {
+  getMyAppointments,
+  type PatientAppointment,
+} from "@/services/api/appointments";
 
-type AppointmentStatus = 'Pending' | 'Confirmed' | 'Cancelled' | 'Completed';
+type AppointmentStatus = "Pending" | "Confirmed" | "Cancelled" | "Completed";
 
 const statusClasses: Record<AppointmentStatus, string> = {
-  Pending: 'bg-amber-100 text-amber-800 border border-amber-200',
-  Confirmed: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
-  Cancelled: 'bg-rose-100 text-rose-800 border border-rose-200',
-  Completed: 'bg-slate-100 text-slate-800 border border-slate-200',
+  Pending: "bg-amber-100 text-amber-800 border border-amber-200",
+  Confirmed: "bg-emerald-100 text-emerald-800 border border-emerald-200",
+  Cancelled: "bg-rose-100 text-rose-800 border border-rose-200",
+  Completed: "bg-slate-100 text-slate-800 border border-slate-200",
 };
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+  return new Date(dateString).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 };
 
 const formatDateTime = (dateTimeString?: string) => {
   if (!dateTimeString) return null;
 
-  return new Date(dateTimeString).toLocaleString('en-GB', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+  return new Date(dateTimeString).toLocaleString("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "short",
   });
 };
 
@@ -43,43 +45,37 @@ const PatientAppointments = () => {
   const [appointments, setAppointments] = useState<PatientAppointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeFilter, setActiveFilter] = useState<'All' | AppointmentStatus>('All');
-  const { patientId } = useParams();
+  const [activeFilter, setActiveFilter] = useState<"All" | AppointmentStatus>(
+    "All",
+  );
 
-
-
-    useEffect(() => {
+  useEffect(() => {
     const fetchAppointments = async () => {
-        try {
-        if (!patientId) {
-            setError('Missing patient id');
-            return;
-        }
-
+      try {
         setLoading(true);
         setError(null);
 
-        const result = await getPatientAppointments(Number(patientId));
+        const result = await getMyAppointments();
 
         if (!result.success) {
-          setError(result.message || 'Failed to load appointments');
+          setError(result.message || "Failed to load appointments");
           return;
         }
 
         setAppointments(result.data ?? []);
       } catch {
-        setError('Something went wrong');
+        setError("Something went wrong");
       } finally {
         setLoading(false);
       }
     };
 
     fetchAppointments();
-  }, [patientId]);
+  }, []); 
 
   const filteredAppointments = useMemo(() => {
-    if (activeFilter === 'All') return appointments;
-    return appointments.filter(a => a.status === activeFilter);
+    if (activeFilter === "All") return appointments;
+    return appointments.filter((a) => a.status === activeFilter);
   }, [activeFilter, appointments]);
 
   if (loading) {
@@ -100,12 +96,15 @@ const PatientAppointments = () => {
 
   return (
     <Layout minimalHeader>
-      <section className="py-16 md:py-24" aria-labelledby="patient-appointments-heading">
+      <section
+        className="py-16 md:py-24"
+        aria-labelledby="patient-appointments-heading"
+      >
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl space-y-8">
             <div className="space-y-4">
               <Link
-                to={`/patient/${patientId}/dashboard`}
+                to="/patient/dashboard"
                 className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-accent/90 focus-visible:outline-offset-4 no-underline"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -123,41 +122,54 @@ const PatientAppointments = () => {
                   My Appointments
                 </h1>
                 <p className="max-w-2xl text-fluid-base text-muted-foreground">
-                  Review your appointment requests, upcoming visits, and previous bookings in one place.
+                  Review your appointment requests, upcoming visits, and
+                  previous bookings in one place.
                 </p>
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <article className="rounded-2xl border bg-card p-6 shadow-sm">
-                <p className="text-sm text-muted-foreground">Total appointments</p>
-                <p className="mt-3 text-4xl font-bold text-foreground">{appointments.length}</p>
+                <p className="text-sm text-muted-foreground">
+                  Total appointments
+                </p>
+                <p className="mt-3 text-4xl font-bold text-foreground">
+                  {appointments.length}
+                </p>
               </article>
 
               <article className="rounded-2xl border bg-card p-6 shadow-sm">
                 <p className="text-sm text-muted-foreground">Pending</p>
                 <p className="mt-3 text-4xl font-bold text-foreground">
-                  {appointments.filter(a => a.status === 'Pending').length}
+                  {appointments.filter((a) => a.status === "Pending").length}
                 </p>
               </article>
 
               <article className="rounded-2xl border bg-card p-6 shadow-sm">
                 <p className="text-sm text-muted-foreground">Confirmed</p>
                 <p className="mt-3 text-4xl font-bold text-foreground">
-                  {appointments.filter(a => a.status === 'Confirmed').length}
+                  {appointments.filter((a) => a.status === "Confirmed").length}
                 </p>
               </article>
 
               <article className="rounded-2xl border bg-card p-6 shadow-sm">
                 <p className="text-sm text-muted-foreground">Completed</p>
                 <p className="mt-3 text-4xl font-bold text-foreground">
-                  {appointments.filter(a => a.status === 'Completed').length}
+                  {appointments.filter((a) => a.status === "Completed").length}
                 </p>
               </article>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              {(['All', 'Pending', 'Confirmed', 'Completed', 'Cancelled'] as const).map(status => {
+              {(
+                [
+                  "All",
+                  "Pending",
+                  "Confirmed",
+                  "Completed",
+                  "Cancelled",
+                ] as const
+              ).map((status) => {
                 const isActive = activeFilter === status;
 
                 return (
@@ -166,11 +178,11 @@ const PatientAppointments = () => {
                     type="button"
                     onClick={() => setActiveFilter(status)}
                     className={[
-                      'rounded-full border px-5 py-2.5 text-sm font-medium transition',
+                      "rounded-full border px-5 py-2.5 text-sm font-medium transition",
                       isActive
-                        ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-border bg-background text-foreground hover:bg-muted',
-                    ].join(' ')}
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-foreground hover:bg-muted",
+                    ].join(" ")}
                   >
                     {status}
                   </button>
@@ -189,7 +201,7 @@ const PatientAppointments = () => {
                   </p>
                 </div>
               ) : (
-                filteredAppointments.map(appointment => (
+                filteredAppointments.map((appointment) => (
                   <article
                     key={appointment.id}
                     className="rounded-2xl border bg-card p-6 shadow-sm"
@@ -244,12 +256,13 @@ const PatientAppointments = () => {
                               Dentist
                             </div>
                             <p className="text-lg font-semibold text-foreground">
-                              {appointment.dentistName ?? 'Not assigned yet'}
+                              {appointment.dentistName ?? "Not assigned yet"}
                             </p>
                           </div>
                         </div>
 
-                        {(appointment.scheduledStartTime || appointment.room) && (
+                        {(appointment.scheduledStartTime ||
+                          appointment.room) && (
                           <div className="grid gap-6 sm:grid-cols-2">
                             {appointment.scheduledStartTime && (
                               <div className="space-y-2">
@@ -258,13 +271,17 @@ const PatientAppointments = () => {
                                   Scheduled visit
                                 </div>
                                 <p className="text-base font-medium text-foreground">
-                                  {formatDateTime(appointment.scheduledStartTime)}
+                                  {formatDateTime(
+                                    appointment.scheduledStartTime,
+                                  )}
                                   {appointment.scheduledEndTime
-                                    ? ` - ${new Date(appointment.scheduledEndTime).toLocaleTimeString('en-GB', {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
+                                    ? ` - ${new Date(
+                                        appointment.scheduledEndTime,
+                                      ).toLocaleTimeString("en-GB", {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
                                       })}`
-                                    : ''}
+                                    : ""}
                                 </p>
                               </div>
                             )}
@@ -285,8 +302,12 @@ const PatientAppointments = () => {
                       </div>
 
                       <div className="flex flex-col gap-3 xl:min-w-[180px]">
-                        <Button asChild size="lg" className="w-full no-underline hover:bg-accent hover:text-accent-foreground">
-                          <Link to={`/patient/${patientId}/book`}>Book Again</Link>
+                        <Button
+                          asChild
+                          size="lg"
+                          className="w-full no-underline hover:bg-accent hover:text-accent-foreground"
+                        >
+                          <Link to="/patient/book">Book Again</Link>
                         </Button>
                       </div>
                     </div>
