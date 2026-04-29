@@ -144,3 +144,11 @@ export const rescheduleAppointment = async (
 
   return response.data;
 };
+
+export const cancelMyAppointment = async (appointmentId: number) => {
+  const response = await api.put(
+    `/patients/me/appointments/${appointmentId}/cancel`
+  );
+
+  return response.data;
+};

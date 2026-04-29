@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import {
   getMyAppointments,
+  cancelMyAppointment,
   type PatientAppointment,
 } from "@/services/api/appointments";
 
@@ -45,6 +46,8 @@ const PatientAppointments = () => {
   const [appointments, setAppointments] = useState<PatientAppointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cancellingId, setCancellingId] = useState<number | null>(null);
+  const [successMessage, setSuccessMessage] = useState("");
   const [activeFilter, setActiveFilter] = useState<"All" | AppointmentStatus>(
     "All",
   );
@@ -71,12 +74,43 @@ const PatientAppointments = () => {
     };
 
     fetchAppointments();
-  }, []); 
+  }, []);
 
   const filteredAppointments = useMemo(() => {
     if (activeFilter === "All") return appointments;
     return appointments.filter((a) => a.status === activeFilter);
   }, [activeFilter, appointments]);
+
+  const handleCancelAppointment = async (appointmentId: number) => {
+    if (!confirm("Are you sure you want to cancel this appointment?")) return;
+
+    try {
+      setCancellingId(appointmentId);
+      setError(null);
+      setSuccessMessage("");
+
+      const result = await cancelMyAppointment(appointmentId);
+
+      if (!result.success) {
+        setError(result.message || "Could not cancel appointment.");
+        return;
+      }
+
+      setSuccessMessage("Appointment cancelled successfully.");
+
+      setAppointments((prev) =>
+        prev.map((appointment) =>
+          appointment.id === appointmentId
+            ? { ...appointment, status: "Cancelled" }
+            : appointment,
+        ),
+      );
+    } catch {
+      setError("Could not cancel appointment.");
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -159,7 +193,15 @@ const PatientAppointments = () => {
                 </p>
               </article>
             </div>
-
+            {successMessage && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-800"
+              >
+                {successMessage}
+              </div>
+            )}
             <div className="flex flex-wrap gap-3">
               {(
                 [
@@ -302,13 +344,26 @@ const PatientAppointments = () => {
                       </div>
 
                       <div className="flex flex-col gap-3 xl:min-w-[180px]">
-                        <Button
-                          asChild
-                          size="lg"
-                          className="w-full no-underline hover:bg-accent hover:text-accent-foreground"
-                        >
-                          <Link to="/patient/book">Book Again</Link>
-                        </Button>
+                        {(appointment.status === "Pending" ||
+                          appointment.status === "Confirmed") && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="lg"
+                            disabled={cancellingId === appointment.id}
+                            onClick={() =>
+                              handleCancelAppointment(appointment.id)
+                            }
+                            className="w-full"
+                          >
+                            {cancellingId === appointment.id
+                              ? "Cancelling..."
+                              : appointment.status === "Pending"
+                                ? "Cancel Request"
+                                : "Cancel Appointment"}
+                          </Button>
+                        )}
+
                       </div>
                     </div>
                   </article>
