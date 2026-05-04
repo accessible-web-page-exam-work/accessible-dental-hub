@@ -14,6 +14,7 @@ import AvailableSlotsModal, {
 } from "@/components/receptionist/AvailableSlotsModal";
 import { createPatientAccount } from "@/services/api/patients";
 import { set } from "date-fns";
+import CancelAppointmentDialog from "@/components/receptionist/CancelAppointmentDialog";
 
 interface Appointment extends ReceptionistAppointment {
   patientId: number;
@@ -387,46 +388,38 @@ export default function ReceptionistDashboard() {
                                 View Slots
                               </Button>
 
-                              <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => {
-                                  if (confirm("Cancel this appointment?")) {
-                                    handleStatusUpdate(
-                                      appointment.id,
-                                      "Cancelled",
-                                    );
-                                  }
-                                }}
-                                disabled={isUpdatingId === appointment.id}
+                              <CancelAppointmentDialog
+                                appointmentId={appointment.id}
+                                patientName={appointment.patientName}
+                                isCancelling={isUpdatingId === appointment.id}
+                                onConfirm={() =>
+                                  handleStatusUpdate(
+                                    appointment.id,
+                                    "Cancelled",
+                                  )
+                                }
                                 className="min-w-[120px]"
-                              >
-                                Cancel
-                              </Button>
+                              />
                             </>
                           )}
 
                           {/* Confirmed */}
+                          {/* Confirmed */}
                           {appointment.status === "Confirmed" && (
                             <>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => {
-                                  if (confirm("Cancel this appointment?")) {
-                                    handleStatusUpdate(
-                                      appointment.id,
-                                      "Cancelled",
-                                    );
-                                  }
-                                }}
-                                disabled={isUpdatingId === appointment.id}
+                              <CancelAppointmentDialog
+                                appointmentId={appointment.id}
+                                patientName={appointment.patientName}
+                                isCancelling={isUpdatingId === appointment.id}
+                                onConfirm={() =>
+                                  handleStatusUpdate(
+                                    appointment.id,
+                                    "Cancelled",
+                                  )
+                                }
+                                label="Cancel Appointment"
                                 className="min-w-[160px]"
-                              >
-                                {isUpdatingId === appointment.id
-                                  ? "Cancelling..."
-                                  : "Cancel Appointment"}
-                              </Button>
+                              />
 
                               <Button
                                 type="button"

@@ -15,6 +15,7 @@ import {
   cancelMyAppointment,
   type PatientAppointment,
 } from "@/services/api/appointments";
+import CancelAppointmentDialog from "@/components/receptionist/CancelAppointmentDialog";
 
 type AppointmentStatus = "Pending" | "Confirmed" | "Cancelled" | "Completed";
 
@@ -82,8 +83,6 @@ const PatientAppointments = () => {
   }, [activeFilter, appointments]);
 
   const handleCancelAppointment = async (appointmentId: number) => {
-    if (!confirm("Are you sure you want to cancel this appointment?")) return;
-
     try {
       setCancellingId(appointmentId);
       setError(null);
@@ -346,24 +345,22 @@ const PatientAppointments = () => {
                       <div className="flex flex-col gap-3 xl:min-w-[180px]">
                         {(appointment.status === "Pending" ||
                           appointment.status === "Confirmed") && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="lg"
-                            disabled={cancellingId === appointment.id}
-                            onClick={() =>
+                          <CancelAppointmentDialog
+                            appointmentId={appointment.id}
+                            patientName="your appointment"
+                            isCancelling={cancellingId === appointment.id}
+                            onConfirm={() =>
                               handleCancelAppointment(appointment.id)
                             }
-                            className="w-full"
-                          >
-                            {cancellingId === appointment.id
-                              ? "Cancelling..."
-                              : appointment.status === "Pending"
+                            label={
+                              appointment.status === "Pending"
                                 ? "Cancel Request"
-                                : "Cancel Appointment"}
-                          </Button>
+                                : "Cancel Appointment"
+                            }
+                            description={`Are you sure you want to cancel appointment #${appointment.id}? This action cannot be undone.`}
+                            className="w-full"
+                          />
                         )}
-
                       </div>
                     </div>
                   </article>
