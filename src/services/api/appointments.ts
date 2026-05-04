@@ -152,3 +152,11 @@ export const cancelMyAppointment = async (appointmentId: number) => {
 
   return response.data;
 };
+
+export const checkPatientEmail = async (email: string) => {
+  const response = await api.get("/Patients/check-email", {
+    params: { email },
+  });
+
+  return response.data;
+};
