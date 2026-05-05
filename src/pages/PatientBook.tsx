@@ -63,7 +63,7 @@ const PatientBook = () => {
       }
 
       console.log("Booking created:", result);
-      setSuccessMessage("Booking created successfully!");
+      setSuccessMessage("Your appointment request has been received. We’ll contact you shortly to confirm the details.");
       setTimeout(() => {
         navigate(`/patient/dashboard`);
       }, 5000);

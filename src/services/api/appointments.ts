@@ -33,6 +33,10 @@ export interface PatientAppointment {
   appointmentSlotId?: number | null;
   scheduledStartTime?: string | null;
   scheduledEndTime?: string | null;
+
+  cancelledBy?: string | null;
+  cancelledAt?: string | null;
+
   room?: string | null;
   dentistName?: string | null;
 }
@@ -69,13 +73,6 @@ export const getPendingAppointments = async () => {
   return response.data;
 };
 
-export const updateAppointmentStatus = async (
-  id: number,
-  status: "Pending" | "Confirmed" | "Cancelled"
-) => {
-  const response = await api.put(`/appointments/${id}/status`, { status });
-  return response.data;
-};
 
 export const getAvailableSlots = async (requestedDate: string, requestedTime: string) => {
   const response = await api.get('/AppointmentSlots/available', {
@@ -144,7 +141,15 @@ export const rescheduleAppointment = async (
 
   return response.data;
 };
+//for receptionist to cancel any appointment
+export const cancelAppointment = async (appointmentId: number) => {
+  const response = await api.put(
+    `/appointments/${appointmentId}/cancel`
+  );
 
+  return response.data;
+};
+//for patient to cancel their own appointment
 export const cancelMyAppointment = async (appointmentId: number) => {
   const response = await api.put(
     `/patients/me/appointments/${appointmentId}/cancel`

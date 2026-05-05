@@ -78,8 +78,18 @@ const PatientAppointments = () => {
   }, []);
 
   const filteredAppointments = useMemo(() => {
-    if (activeFilter === "All") return appointments;
-    return appointments.filter((a) => a.status === activeFilter);
+    const filtered =
+      activeFilter === "All"
+        ? appointments
+        : appointments.filter((a) => a.status === activeFilter);
+
+    return [...filtered].sort((a, b) => {
+      const dateA = new Date(a.scheduledStartTime ?? a.requestedDate).getTime();
+
+      const dateB = new Date(b.scheduledStartTime ?? b.requestedDate).getTime();
+
+      return dateB - dateA;
+    });
   }, [activeFilter, appointments]);
 
   const handleCancelAppointment = async (appointmentId: number) => {
@@ -100,7 +110,13 @@ const PatientAppointments = () => {
       setAppointments((prev) =>
         prev.map((appointment) =>
           appointment.id === appointmentId
-            ? { ...appointment, status: "Cancelled" }
+            ? {
+                ...appointment,
+                status: "Cancelled",
+                cancelledBy: result.data?.cancelledBy ?? "Patient",
+                cancelledAt:
+                  result.data?.cancelledAt ?? new Date().toISOString(),
+              }
             : appointment,
         ),
       );
@@ -337,6 +353,29 @@ const PatientAppointments = () => {
                                   {appointment.room}
                                 </p>
                               </div>
+                            )}
+                          </div>
+                        )}
+                        {appointment.status === "Cancelled" && (
+                          <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
+                            <p>
+                              Cancelled by:{" "}
+                              <span className="font-semibold">
+                                {appointment.cancelledBy === "Receptionist"
+                                  ? "The clinic"
+                                  : (appointment.cancelledBy ?? "The clinic")}
+                              </span>
+                            </p>
+
+                            {appointment.cancelledAt && (
+                              <p className="mt-1">
+                                Cancelled at:{" "}
+                                <span className="font-semibold">
+                                  {new Date(
+                                    appointment.cancelledAt,
+                                  ).toLocaleString("sv-SE")}
+                                </span>
+                              </p>
                             )}
                           </div>
                         )}

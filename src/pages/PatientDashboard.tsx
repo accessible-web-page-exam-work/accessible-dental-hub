@@ -48,6 +48,28 @@ const PatientDashboard = () => {
         new Date(b.scheduledStartTime ?? b.requestedDate).getTime(),
     )[0];
 
+  const latestActiveAppointment = appointments
+    .filter((a) => a.status !== "Cancelled")
+    .sort(
+      (a, b) =>
+        new Date(b.requestedDate).getTime() -
+        new Date(a.requestedDate).getTime(),
+    )[0];
+
+  const latestCancelledAppointment = appointments
+    .filter((a) => a.status === "Cancelled")
+    .sort(
+      (a, b) =>
+        new Date(b.cancelledAt ?? b.requestedDate).getTime() -
+        new Date(a.cancelledAt ?? a.requestedDate).getTime(),
+    )[0];
+
+  const shouldShowCancellation =
+    latestCancelledAppointment &&
+    (!latestActiveAppointment ||
+      new Date(latestCancelledAppointment.cancelledAt ?? 0).getTime() >
+        new Date(latestActiveAppointment.requestedDate).getTime());
+
   return (
     <Layout minimalHeader>
       <section
@@ -70,6 +92,29 @@ const PatientDashboard = () => {
               </p>
             </div>
 
+            {shouldShowCancellation && latestCancelledAppointment && (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-900">
+                <h2 className="font-semibold">Appointment cancelled</h2>
+
+                <p className="mt-2 text-sm">
+                  Your appointment request for{" "}
+                  <span className="font-semibold">
+                    {new Date(
+                      latestCancelledAppointment.requestedDate,
+                    ).toLocaleDateString("sv-SE", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>{" "}
+                  was cancelled by{" "}
+                  <span className="font-semibold">
+                    {latestCancelledAppointment.cancelledBy ?? "the clinic"}
+                  </span>
+                  .
+                </p>
+              </div>
+            )}
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {/* Next appointment */}
               <PatientNextAppointmentCard

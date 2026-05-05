@@ -14,6 +14,9 @@ interface Appointment extends ReceptionistAppointment {
   phoneNumber?: string | null;
   email?: string | null;
   isNewPatient?: boolean;
+
+  cancelledBy?: string | null;
+  cancelledAt?: string | null;
 }
 
 interface Props {
@@ -104,6 +107,28 @@ export default function AppointmentCard({
                 ? `Patient: ${appointment.patientName}`
                 : `Patient ID: ${appointment.patientId}`}
             </p>
+            {/* Cancelled */}
+            {appointment.status === "Cancelled" && (
+              <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm">
+                <p className="text-rose-900">
+                  Cancelled by:{" "}
+                  <span className="font-semibold">
+                    {appointment.cancelledBy ?? "Unknown"}
+                  </span>
+                </p>
+
+                {appointment.cancelledAt && (
+                  <p className="mt-1 text-rose-900">
+                    Cancelled at:{" "}
+                    <span className="font-semibold">
+                      {new Date(appointment.cancelledAt).toLocaleString(
+                        "sv-SE",
+                      )}
+                    </span>
+                  </p>
+                )}
+              </div>
+            )}
           </div>
           <div className="flex flex-wrap gap-3">
             {/* Pending */}
@@ -143,13 +168,6 @@ export default function AppointmentCard({
                   Reschedule
                 </Button>
               </>
-            )}
-
-            {/* Cancelled */}
-            {appointment.status === "Cancelled" && (
-              <span className="text-sm text-muted-foreground italic">
-                Appointment cancelled
-              </span>
             )}
 
             {/* New patient */}
