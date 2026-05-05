@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, CheckCircle, ArrowLeft, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
+  checkPatientEmail,
   createAppointment,
   type CreateAppointmentRequest,
 } from "@/services/api/appointments";
@@ -59,6 +60,8 @@ export default function BookAppointment() {
   const [errors, setErrors] = useState<FormErrors>({});
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState("");
+  const [existingPatientNotice, setExistingPatientNotice] = useState(false);
+  const [continueAsGuest, setContinueAsGuest] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -135,6 +138,14 @@ export default function BookAppointment() {
     setIsSubmitting(true);
 
     try {
+      // 👇 STEP 1: check if email exists
+      const emailCheck = await checkPatientEmail(formData.email);
+
+      if (emailCheck.exists && !continueAsGuest) {
+        setExistingPatientNotice(true);
+        setIsSubmitting(false);
+        return; // 🚨 STOP submission here
+      }
       const combinedCommunicationNeeds =
         [
           formData.communicationNeeds.trim(),
@@ -307,7 +318,11 @@ export default function BookAppointment() {
                   label="Email Address"
                   type="email"
                   value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  onChange={(e) => {
+                    handleInputChange("email", e.target.value);
+                    setExistingPatientNotice(false);
+                    setContinueAsGuest(false);
+                  }}
                   error={errors.email}
                   hint="We'll use this to send appointment confirmations"
                   required
@@ -617,7 +632,43 @@ export default function BookAppointment() {
                     )}
                   </dl>
                 </div>
+                {existingPatientNotice && (
+                  <div
+                    role="alert"
+                    aria-live="assertive"
+                    className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+                  >
+                    <p className="font-semibold">
+                      Existing patient record found
+                    </p>
+                    <p className="mt-1">
+                      This email appears to already be connected to a patient
+                      record. Please log in to book with your account, or
+                      continue as a guest.
+                    </p>
 
+                    <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                      <Button
+                        asChild
+                        size="lg"
+                        className="min-h-touch hover:bg-accent hover:text-accent-foreground no-underline"
+                      >
+                        <Link to="/patient/login">Log in</Link>
+                      </Button>
+
+                      <Button
+                        size="lg"
+                        className="min-h-touch hover:bg-accent hover:text-accent-foreground no-underline"
+                        onClick={() => {
+                          setContinueAsGuest(true);
+                          setExistingPatientNotice(false);
+                        }}
+                      >
+                        Continue as guest
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 {submitError && (
                   <div
                     className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"
