@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import {
   getAllAppointments,
-  updateAppointmentStatus,
+  cancelAppointment,
   getAvailableSlots,
   confirmAppointmentWithSlot,
   rescheduleAppointment,
@@ -26,6 +26,9 @@ interface Appointment extends ReceptionistAppointment {
   phoneNumber?: string | null;
   email?: string | null;
   isNewPatient?: boolean;
+
+  cancelledBy?: string | null;
+  cancelledAt?: string | null;
 }
 
 type FilterStatus = "All" | "Pending" | "Confirmed" | "Cancelled";
@@ -126,17 +129,19 @@ export default function ReceptionistDashboard() {
     }
   };
 
-  const handleStatusUpdate = async (
-    appointmentId: number,
-    status: "Pending" | "Confirmed" | "Cancelled",
-  ) => {
+  const handleCancelAppointment = async (appointmentId: number) => {
     try {
+      setError("");
+      setSuccessMessage("");
       setIsUpdatingId(appointmentId);
-      await updateAppointmentStatus(appointmentId, status);
+
+      await cancelAppointment(appointmentId);
+
+      setSuccessMessage("Appointment cancelled successfully.");
       await loadAppointments();
     } catch (err) {
-      console.error(`Failed to update appointment ${appointmentId}:`, err);
-      setError("Could not update appointment status.");
+      console.error(`Failed to cancel appointment ${appointmentId}:`, err);
+      setError("Could not cancel appointment.");
     } finally {
       setIsUpdatingId(null);
     }
@@ -310,9 +315,7 @@ export default function ReceptionistDashboard() {
                   isCreatingAccount={
                     isCreatingAccountId === appointment.patientId
                   }
-                  onCancel={() =>
-                    handleStatusUpdate(appointment.id, "Cancelled")
-                  }
+                  onCancel={() => handleCancelAppointment(appointment.id)}
                   onOpenSlots={() => handleOpenSlots(appointment)}
                   onReschedule={() => {
                     setIsRescheduling(true);
