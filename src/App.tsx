@@ -18,7 +18,6 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
 
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -34,10 +33,38 @@ const App = () => (
             <Route path="/book" element={<BookAppointment />} />
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/receptionist" element={<ProtectedRoute><ReceptionistDashboard /></ProtectedRoute>} />
-            <Route path="/patient/dashboard" element={<ProtectedRoute><PatientDashboard /></ProtectedRoute>} />
-            <Route path="/patient/book" element={<ProtectedRoute><PatientBook /></ProtectedRoute>} />
-            <Route path="/patient/appointments" element={<ProtectedRoute><PatientAppointments /></ProtectedRoute>} />
+            <Route
+              path="/receptionist"
+              element={
+                <ProtectedRoute>
+                  <ReceptionistDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/patient/dashboard"
+              element={
+                <ProtectedRoute>
+                  <PatientDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/patient/book"
+              element={
+                <ProtectedRoute>
+                  <PatientBook />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/patient/appointments"
+              element={
+                <ProtectedRoute>
+                  <PatientAppointments />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/receptionist/login" element={<Login />} />
             <Route path="/patient/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />

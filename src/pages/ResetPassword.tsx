@@ -60,7 +60,9 @@ const ResetPassword = () => {
         navigate("/patient/login");
       }, 1500);
     } catch {
-      setErrorMessage("Could not set password. The link may be expired or invalid.");
+      setErrorMessage(
+        "Could not set password. The link may be expired or invalid.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -80,13 +82,19 @@ const ResetPassword = () => {
             </p>
 
             {successMessage && (
-              <div role="status" className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+              <div
+                role="status"
+                className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+              >
                 {successMessage}
               </div>
             )}
 
             {errorMessage && (
-              <div role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div
+                role="alert"
+                className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              >
                 {errorMessage}
               </div>
             )}
@@ -108,7 +116,10 @@ const ResetPassword = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="confirmPassword" className="text-sm font-medium">
+                <label
+                  htmlFor="confirmPassword"
+                  className="text-sm font-medium"
+                >
                   Confirm password
                 </label>
                 <input
@@ -122,7 +133,12 @@ const ResetPassword = () => {
                 />
               </div>
 
-              <Button type="submit" size="lg" disabled={isSubmitting} className="w-full">
+              <Button
+                type="submit"
+                size="lg"
+                disabled={isSubmitting}
+                className="w-full"
+              >
                 {isSubmitting ? "Saving..." : "Set Password"}
               </Button>
             </form>
