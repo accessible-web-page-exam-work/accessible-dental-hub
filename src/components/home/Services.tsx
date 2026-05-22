@@ -16,31 +16,37 @@ const services = [
     icon: Smile,
     title: 'General Dentistry',
     description: 'Comprehensive check-ups, cleanings, and preventive care to maintain your oral health.',
+    href: '/services#general-dentistry',
   },
   {
     icon: Sparkles,
     title: 'Cosmetic Dentistry',
     description: 'Teeth whitening, veneers, and smile makeovers to enhance your confidence.',
+    href: '/services#cosmetic-dentistry',
   },
   {
     icon: Shield,
     title: 'Restorative Care',
     description: 'Fillings, crowns, bridges, and implants to restore damaged or missing teeth.',
+    href: '/services#restorative-care',
   },
   {
     icon: Heart,
     title: 'Emergency Care',
     description: 'Same-day appointments available for dental emergencies and urgent pain relief.',
+    href: '/services#emergency-care',
   },
   {
     icon: Stethoscope,
     title: 'Periodontal Treatment',
     description: 'Gum disease prevention and treatment to protect your dental foundation.',
+    href: '/services#periodontal-treatment',
   },
   {
     icon: Baby,
     title: 'Pediatric Dentistry',
     description: 'Gentle, child-friendly care in a comfortable environment for young patients.',
+    href: '/services#pediatric-dentistry',
   },
 ];
 
@@ -92,7 +98,7 @@ export function Services() {
                   {service.description}
                 </p>
                 <Link 
-                  to="/services"
+                  to={service.href}
                   className="inline-flex items-center text-primary font-medium hover:underline"
                 >
                   Learn more
@@ -106,7 +112,7 @@ export function Services() {
 
         {/* CTA */}
         <div className="text-center mt-12">
-          <Button asChild size="lg" className="min-h-touch text-base font-semibold">
+          <Button asChild size="lg" className="min-h-touch text-base font-semibold no-underline hover:bg-accent hover:text-accent-foreground">
             <Link to="/book">
               Book Your Appointment Today
               <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
