@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import {
   getAllAppointments,
@@ -34,6 +34,7 @@ interface Appointment extends ReceptionistAppointment {
 type FilterStatus = "All" | "Pending" | "Confirmed" | "Cancelled";
 
 export default function ReceptionistDashboard() {
+  const headingRef = useRef<HTMLHeadingElement>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdatingId, setIsUpdatingId] = useState<number | null>(null);
@@ -68,6 +69,10 @@ export default function ReceptionistDashboard() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     loadAppointments();
@@ -232,7 +237,11 @@ export default function ReceptionistDashboard() {
             <p className="text-sm font-semibold uppercase tracking-wide text-primary">
               Receptionist workspace
             </p>
-            <h1 className="text-fluid-3xl font-bold text-foreground">
+            <h1
+              ref={headingRef}
+              tabIndex={-1}
+              className="text-fluid-3xl font-bold text-foreground"
+            >
               Appointment Requests Dashboard
             </h1>
             <p className="max-w-3xl text-muted-foreground">
