@@ -59,14 +59,13 @@ const Login = () => {
         localStorage.setItem("roles", JSON.stringify(result.roles));
         localStorage.setItem("patientId", result.patientId.toString());
 
-        navigate("/patient/dashboard")
+        navigate("/patient/dashboard");
         return;
       }
 
       setErrorMessage(
         `This account does not have ${expectedRole.toLowerCase()} access.`,
       );
-
     } catch {
       setErrorMessage("Invalid email or password.");
     } finally {
