@@ -64,7 +64,10 @@ const Portal = () => {
                     size="lg"
                     className="w-full min-h-touch hover:bg-accent hover:text-accent-foreground no-underline"
                   >
-                    <Link to="/home">
+                    <Link
+                      to="/home"
+                      aria-label="Continue as guest and enter the public website"
+                    >
                       Enter Website
                       <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                     </Link>
@@ -106,6 +109,11 @@ const Portal = () => {
                         isLoggedIn && isReceptionist
                           ? "/receptionist"
                           : "/receptionist/login"
+                      }
+                      aria-label={
+                        isLoggedIn && isReceptionist
+                          ? "Go to receptionist dashboard"
+                          : "Open receptionist login"
                       }
                     >
                       {isLoggedIn && isReceptionist
@@ -151,6 +159,11 @@ const Portal = () => {
                         isLoggedIn && isPatient
                           ? "/patient/dashboard"
                           : "/patient/login"
+                      }
+                      aria-label={
+                        isLoggedIn && isPatient
+                          ? "Go to registered patient dashboard"
+                          : "Log in as registered patient"
                       }
                     >
                       {isLoggedIn && isPatient

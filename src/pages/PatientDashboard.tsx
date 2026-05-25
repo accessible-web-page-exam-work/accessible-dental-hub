@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   getMyAppointments,
   type PatientAppointment,
@@ -13,6 +13,7 @@ const PatientDashboard = () => {
   const [appointments, setAppointments] = useState<PatientAppointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [patientName, setPatientName] = useState("Patient");
+  const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     const loadAppointments = async () => {
@@ -39,6 +40,12 @@ const PatientDashboard = () => {
 
     loadUser();
   }, []);
+
+  useEffect(() => {
+    if (patientName) {
+      headingRef.current?.focus();
+    }
+  }, [patientName]);
 
   const nextAppointment = appointments
     .filter((a) => a.status === "Confirmed")
@@ -83,8 +90,12 @@ const PatientDashboard = () => {
               <p className="text-sm font-semibold uppercase tracking-wide text-primary">
                 Patient Portal
               </p>
-              <h1 className="text-fluid-4xl font-bold text-foreground">
-                Welcome back {patientName}!
+              <h1
+                ref={headingRef}
+                tabIndex={-1}
+                className="text-fluid-4xl font-bold text-foreground"
+              >
+                Welcome back{patientName ? `, ${patientName}` : ""}!
               </h1>
               <p className="max-w-2xl text-fluid-base text-muted-foreground">
                 View your appointments, request a new booking, and keep your
