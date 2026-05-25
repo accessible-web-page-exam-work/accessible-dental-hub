@@ -181,7 +181,7 @@ export default function BookAppointment() {
       );
       setTimeout(() => {
         navigate("/");
-      }, 5000);
+      }, 8000);
     } catch (error: any) {
       console.error("Failed to create appointment:", error);
 
@@ -273,15 +273,20 @@ export default function BookAppointment() {
           </div>
 
           <div id="step-announcement" className="sr-only" aria-live="polite" />
-          {successMessage && (
+
             <div
               role="status"
               aria-live="polite"
-              className="mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+              aria-atomic="true"
+              className={
+                successMessage
+                  ? "mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+                  : "sr-only"
+              }
             >
               {successMessage}
             </div>
-          )}
+
 
           <form onSubmit={handleSubmit} noValidate>
             {step === 1 && (
