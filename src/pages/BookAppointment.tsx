@@ -274,19 +274,18 @@ export default function BookAppointment() {
 
           <div id="step-announcement" className="sr-only" aria-live="polite" />
 
-            <div
-              role="status"
-              aria-live="polite"
-              aria-atomic="true"
-              className={
-                successMessage
-                  ? "mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
-                  : "sr-only"
-              }
-            >
-              {successMessage}
-            </div>
-
+          <div
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className={
+              successMessage
+                ? "mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+                : "sr-only"
+            }
+          >
+            {successMessage}
+          </div>
 
           <form onSubmit={handleSubmit} noValidate>
             {step === 1 && (

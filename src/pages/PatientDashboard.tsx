@@ -78,7 +78,7 @@ const PatientDashboard = () => {
         new Date(latestActiveAppointment.requestedDate).getTime());
 
   return (
-    <Layout minimalHeader>
+    <Layout>
       <section
         className="py-16 md:py-24"
         aria-labelledby="patient-dashboard-heading"

@@ -74,7 +74,7 @@ const Login = () => {
   };
 
   return (
-    <Layout minimalHeader>
+    <Layout>
       <section className="py-16 md:py-24">
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-md rounded-2xl border bg-card p-6 shadow-sm md:p-8">

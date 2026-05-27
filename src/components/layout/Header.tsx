@@ -92,9 +92,10 @@ export function Header({ minimal = false }: HeaderProps) {
               onClick={handleLogout}
               variant="outline"
               size="sm"
-              className="hidden md:inline-flex"
+              className="inline md:inline-flex"
+              aria-label="Logout"
             >
-              Logout
+              <LogOut className="h-4 w-4" aria-hidden="true" />
             </Button>
           )}
 

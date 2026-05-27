@@ -78,7 +78,7 @@ const PatientBook = () => {
   };
 
   return (
-    <Layout minimalHeader>
+    <Layout>
       <section
         className="py-16 md:py-24"
         aria-labelledby="patient-book-heading"
