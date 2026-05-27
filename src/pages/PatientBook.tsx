@@ -63,10 +63,12 @@ const PatientBook = () => {
       }
 
       console.log("Booking created:", result);
-      setSuccessMessage("Your appointment request has been received. We’ll contact you shortly to confirm the details.");
+      setSuccessMessage(
+        "Your appointment request has been received. We’ll contact you shortly to confirm the details.",
+      );
       setTimeout(() => {
         navigate(`/patient/dashboard`);
-      }, 5000);
+      }, 10000);
     } catch (error) {
       console.error("Booking request failed:", error);
       setErrorMessage("Booking request failed. Please try again.");
@@ -76,7 +78,7 @@ const PatientBook = () => {
   };
 
   return (
-    <Layout minimalHeader>
+    <Layout>
       <section
         className="py-16 md:py-24"
         aria-labelledby="patient-book-heading"
@@ -110,15 +112,18 @@ const PatientBook = () => {
             </div>
 
             <div className="rounded-2xl border bg-card p-6 shadow-sm md:p-8">
-              {successMessage && (
-                <div
-                  role="status"
-                  aria-live="polite"
-                  className="mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
-                >
-                  {successMessage}
-                </div>
-              )}
+              <div
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                className={
+                  successMessage
+                    ? "mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+                    : "sr-only"
+                }
+              >
+                {successMessage}
+              </div>
 
               {errorMessage && (
                 <div
@@ -286,7 +291,7 @@ const PatientBook = () => {
                     disabled={isSubmitting}
                     className="min-h-touch hover:bg-accent hover:text-accent-foreground no-underline"
                   >
-                    {isSubmitting ? 'Submitting...' : 'Submit Request'}
+                    {isSubmitting ? "Submitting..." : "Submit Request"}
                   </Button>
                 </div>
               </form>
