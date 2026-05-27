@@ -129,7 +129,7 @@ const PatientAppointments = () => {
 
   if (loading) {
     return (
-      <Layout minimalHeader>
+      <Layout >
         <div className="container px-4 py-16">Loading appointments...</div>
       </Layout>
     );
@@ -137,14 +137,14 @@ const PatientAppointments = () => {
 
   if (error) {
     return (
-      <Layout minimalHeader>
+      <Layout>
         <div className="container px-4 py-16">{error}</div>
       </Layout>
     );
   }
 
   return (
-    <Layout minimalHeader>
+    <Layout >
       <section
         className="py-16 md:py-24"
         aria-labelledby="patient-appointments-heading"
