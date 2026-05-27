@@ -93,7 +93,7 @@ export function Header({ minimal = false }: HeaderProps) {
               variant="outline"
               size="sm"
               className="inline md:inline-flex"
-              aria-label="Logout"
+              aria-label="Logout of your account"
             >
               <LogOut className="h-4 w-4" aria-hidden="true" />
             </Button>
